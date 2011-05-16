@@ -50,4 +50,3 @@ class Browser(z2.Browser):
         with open(filepath, 'w') as file:
             file.write(self.contents)
         webbrowser.get(web_browser_name).open('file://' + filepath)
-
