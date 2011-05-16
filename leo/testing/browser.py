@@ -34,7 +34,6 @@ class Browser(z2.Browser):
         self.getControl(name='__ac_name').value = username
         self.getControl(name='__ac_password').value = password
         self.getControl('Log in').click()
-#        self.getControl(name='submit').click()
 
     def start_zserver(self, web_browser_name='firefox'):
         """Start ZServer so we can inspect site state with a normal browser
