@@ -1,6 +1,10 @@
+from plone.portlets.interfaces import IPortletAssignmentMapping
+from plone.portlets.interfaces import IPortletManager
 from plone.testing import z2
 from tempfile import gettempdir
 from Testing.ZopeTestCase.utils import startZServer
+from zope.component import getMultiAdapter
+from zope.component import getUtility
 
 import os
 import webbrowser
@@ -42,6 +46,12 @@ class Browser(z2.Browser):
         self.getControl(name='__ac_name').value = username
         self.getControl(name='__ac_password').value = password
         self.getControl('Log in').click()
+
+    def deletePortletManager(self, portal, name):
+        """Delete portlet manager of the name."""
+        column = getUtility(IPortletManager, name=name)
+        assignable = getMultiAdapter((portal, column), IPortletAssignmentMapping)
+        del assignable[name]
 
     def startZserver(self, web_browser_name='firefox'):
         """Start ZServer so we can inspect site state with a normal browser

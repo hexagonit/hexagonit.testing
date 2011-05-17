@@ -65,6 +65,17 @@ class TestBrowser(unittest.TestCase):
             ((), {'name': '__ac_password'}),
             (('Log in',), {})])
 
+    @mock.patch('leo.testing.browser.getUtility')
+    @mock.patch('leo.testing.browser.getMultiAdapter')
+    def test_deletePortletManager(self, getMultiAdapter, getUtility):
+        portlet_managers = {'plone.leftcolumn': '', 'plone.rightcolumn': ''}
+        getMultiAdapter.return_value = portlet_managers
+        browser = self.make_browser()
+        portal = mock.Mock()
+        name = 'plone.leftcolumn'
+        browser.deletePortletManager(portal, name)
+        self.assertEquals({'plone.rightcolumn': ''}, portlet_managers)
+
     @mock.patch('leo.testing.browser.webbrowser')
     def test_startZserver(self, webbrowser):
         browser = self.make_browser()
