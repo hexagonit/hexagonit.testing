@@ -11,7 +11,7 @@ class Browser(z2.Browser):
 
     _base_url = None
 
-    def set_base_url(self, base_url):
+    def setBaseUrl(self, base_url):
         """Sets a base URL for all subsequent requests."""
         self._base_url = base_url
 
@@ -28,6 +28,14 @@ class Browser(z2.Browser):
 
         super(self.__class__, self).open(url, data)
 
+    def setHeader(self, name, value):
+        """Set a request header possibly overwriting an existing header with
+        the same name.
+        """
+        headers = dict((k.lower(), (k, v)) for k, v in self.mech_browser.addheaders)
+        headers[name.lower()] = (name, value)
+        self.mech_browser.addheaders = [headers.pop(k.lower()) for k, v in self.mech_browser.addheaders] + headers.values()
+
     def login(self, username, password, login_url='/login_form'):
         """Logs into the portal."""
         self.open(login_url)
@@ -35,13 +43,13 @@ class Browser(z2.Browser):
         self.getControl(name='__ac_password').value = password
         self.getControl('Log in').click()
 
-    def start_zserver(self, web_browser_name='firefox'):
+    def startZserver(self, web_browser_name='firefox'):
         """Start ZServer so we can inspect site state with a normal browser
         like FireFox."""
         echo = startZServer()
         webbrowser.get(web_browser_name).open('http://%s:%s/plone' % echo)
 
-    def open_html(self, web_browser_name='firefox'):
+    def openBrowser(self, web_browser_name='firefox'):
         """Dumps self.browser.contents (HTML) to a file and opens it with
         a normal browser."""
         tmp_filename = 'testbrowser.html'
