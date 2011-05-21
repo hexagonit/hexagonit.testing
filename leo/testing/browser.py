@@ -22,8 +22,8 @@ class Browser(z2.Browser):
 
     _base_url = None
 
-    def __init__(self, app, url=None):
-        super(z2.Browser, self).__init__(url=url, mech_browser=LeoMechanizeBrowser(app))
+#    def __init__(self, app, url=None):
+#        super(z2.Browser, self).__init__(url=url, mech_browser=LeoMechanizeBrowser(app))
 
     def setBaseUrl(self, base_url):
         """Sets a base URL for all subsequent requests."""
