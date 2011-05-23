@@ -93,3 +93,11 @@ class TestBrowser(unittest.TestCase):
         self.assertEquals('<html />', of.readline())
         webbrowser.get.assert_called_with('firefox')
         self.failUnless(webbrowser.get().open.called)
+
+    def test_post(self):
+        url = 'http://localhost/@@echo.html'
+        data = 'x=1&y=2'
+        browser = self.make_browser()
+        from urllib2 import HTTPError
+#        self.assertRaises(HTTPError, lambda: browser.post(url, data))
+        browser.setBaseUrl('http://nohost/plone')

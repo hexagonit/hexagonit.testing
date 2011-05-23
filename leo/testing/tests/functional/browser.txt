@@ -1,0 +1,137 @@
+    >>> fields = {'username': 'Some Name'}
+
+    >>> mf = browser.multipart_formdata(fields)
+
+    >>> data = "Content-Type: {0}\r\n\r\n{1}".format(mf[1], mf[0])
+
+#    >>> data = 'Content-Type: multipart/form-data; boundary=BOUNDARY\r\n\r\n--BOUNDARY\r\nContent-Disposition: form-data; name=username\r\nContent-Length: 9\r\n\r\nSome Name\r\n--BOUNDARY--\r\n'
+
+
+#    >>> data = """Content-Type: multipart/form-data; boundary=-AabbZ\r\n---AabbZ\r\nContent-Disposition: form-data; name="username\n\nSome Name\n---AabbZ"""
+
+#    >>> data = """Content-Type: multipart/form-data; boundary=\n\n--\nContent-Disposition: form-data; name="username\n\nSome Name\n--"""
+
+    >>> browser.post('/@@echo', data)
+
+    >>> print browser.headers
+    Status: 200 Ok
+    Content-Length: 0
+    Set-Cookie: I18N_LANGUAGE="en"; Path=/
+
+#    >>> import StringIO
+#    >>> dummy_file_1 = StringIO.StringIO('file1.txt')
+
+    >>> data
+    'Content-Type: multipart/form-data; boundary=BOUNDARY\r\n\r\n--BOUNDARY\r\nContent-Disposition: form-data; name=username\r\nContent-Length: 9\r\n\r\nSome Name\r\n--BOUNDARY--\r\n'
+
+    >>> data = """Content-Type: multipart/form-data; boundary=BOUNDARY
+    ...
+    ... --BOUNDARY
+    ... Content-Disposition: form-data; name=username
+    ... Content-Length: 9
+    ...
+    ... Some Name
+    ... --BOUNDARY
+    ... Content-Disposition: form-data; name="files"; filename="file1.txt"
+    ... Content-Type: text/plain
+    ...
+    ... Some text comes here.
+    ... --BOUNDARY--
+    ... """
+
+    >>> browser.post('/@@echo', data)
+
+    >>> data = """Content-Type: multipart/form-data; boundary=BOUNDARY
+    ...
+    ... --BOUNDARY
+    ... Content-Disposition: form-data; name=username
+    ...
+    ... Some Name
+    ... --BOUNDARY
+    ... Content-Disposition: form-data; name="files"
+    ... Content-Type: multipart/mixed; boundary=BBBBB
+    ...
+    ... --BBBBB
+    ... Content-Disposition: file; filename="file1.txt"
+    ... Content-Type: text/plain
+    ...
+    ... Some text comes here.
+    ... --BBBBB
+    ... Content-Disposition: file; filename="file2.gif"
+    ... Content-Type: image/gif
+    ... Content-Transfer-Encoding: binary
+    ...
+    ... Binary gif file.
+    ... --BBBBB--
+    ... --BOUNDARY--
+    ... """
+
+
+    >>> browser.post('/@@echo', data)
+
+
+    >>> data = """Content-Type: multipart/form-data; boundary=BOUNDARY
+    ...
+    ... --BOUNDARY
+    ... Content-Disposition: form-data; name=username
+    ...
+    ... Some Name
+    ... --BOUNDARY
+    ... Content-Disposition: form-data; name="files"
+    ... Content-Type: multipart/mixed; boundary=BBBBB
+    ...
+    ... --BBBBB
+    ... Content-Disposition: file; filename="file1.txt"
+    ... Content-Type: text/plain
+    ...
+    ... Some text comes here.
+    ... --BBBBB--
+    ... --BOUNDARY--
+    ... """
+
+    >>> browser.post('/@@echo', data)
+
+#browser.post('/@@echo', {
+#    'payload': {
+#        'filename: 'filename.txt',
+#        'content-type': 'text/plain',
+#        'data': StringIO('foobar')},
+#    'token': 'foobar',
+#})
+
+#browser.post('/@@echo', {
+#    'payload': ('filename.png', 'image/png', open('.../filename.png'),
+#    'token': 'foobar',
+#})
+
+    >>> data = {'new_name': 'My New Name'}
+    >>> browser.post('/@@echo', data)
+
+
+    >>> import StringIO
+    >>> fields = {
+    ...     'new_name': 'My New Name',
+    ...     'files' : {
+    ...         'filename': 'filename.txt',
+    ...         'content-type': 'text/plain',
+    ...         'data': StringIO.StringIO('foobar')},
+    ... }
+
+    >>> browser.post('/@@echo', fields)
+
+#browser.post('/@@echo', {
+#    'payload': ('filename.png', 'image/png', open('.../filename.png'),
+#    'token': 'foobar',
+#})
+
+
+
+#    >>> print browser.contents
+#    <BLANKLINE>
+
+#    >>> import StringIO
+#    >>> dummy_file_1 = StringIO.StringIO('Dummy File 1')
+#    >>> browser.open('/@@test-form')
+#    >>> browser.getControl(name="token").value = 'aaa'
+#    >>> browser.getControl(name="mimetype").value = 'bbb'
+#    >>> browser.getControl(name="form.button.Submit").click()
