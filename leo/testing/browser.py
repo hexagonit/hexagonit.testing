@@ -138,7 +138,7 @@ class Browser(z2.Browser):
         """Start ZServer so we can inspect site state with a normal browser
         like FireFox."""
         echo = startZServer()
-        webbrowser.get(web_browser_name).open('http://%s:%s/plone' % echo)
+        webbrowser.open_new_tab('http://%s:%s/plone' % echo)
 
     def openBrowser(self, web_browser_name='firefox'):
         """Dumps self.browser.contents (HTML) to a file and opens it with
@@ -147,7 +147,7 @@ class Browser(z2.Browser):
         filepath = os.path.join(gettempdir(), tmp_filename)
         with open(filepath, 'w') as file:
             file.write(self.contents)
-        webbrowser.get(web_browser_name).open('file://' + filepath)
+        webbrowser.open_new_tab('file://' + filepath)
 
     def DISABLED_post(self, url, data):
         """Posting to url with multipart/form-data instead of application/x-www-form-urlencoded
