@@ -1,22 +1,22 @@
+from mechanize import _response
+from mechanize import _rfc3986
+from mechanize import _sockettimeout
+from mechanize import _urllib2_fork
+from mechanize._mechanize import BrowserStateError
+from mechanize._opener import OpenerDirector
+from mechanize._useragent import UserAgentBase
 from plone.portlets.interfaces import IPortletAssignmentMapping
 from plone.portlets.interfaces import IPortletManager
 from plone.testing import z2
+from plone.testing._z2_testbrowser import Zope2HTTPHandler
+from plone.testing._z2_testbrowser import Zope2MechanizeBrowser
 from tempfile import gettempdir
 from Testing.ZopeTestCase.utils import startZServer
+from urllib2 import splithost
+from urllib2 import splittype
+from urllib2 import URLError
 from zope.component import getMultiAdapter
 from zope.component import getUtility
-from plone.testing._z2_testbrowser import Zope2MechanizeBrowser
-from plone.testing._z2_testbrowser import Zope2HTTPHandler
-from urllib2 import URLError
-from urllib2 import splittype
-from urllib2 import splithost
-from mechanize import _sockettimeout
-from mechanize import _rfc3986
-from mechanize._mechanize import BrowserStateError
-from mechanize._useragent import UserAgentBase
-from mechanize import _response
-from mechanize import _urllib2_fork
-from mechanize._opener import OpenerDirector
 
 import copy
 import mechanize
@@ -163,8 +163,19 @@ class Browser(z2.Browser):
 
         return ''.join(body), content_type
 
+#    def post(self, url, data):
+#        _z2_testbrowser.Zope2HTTPHandler = LeoHTTPHandler
+#        return super(Browser, self).post(url, data)
+
 
 class LeoMechanizeBrowser(Zope2MechanizeBrowser):
+
+#    def __init__(self, app, *args, **kws):
+#        super(LeoMechanizeBrowser, self).__init__(app, *args, **kws)
+#        def httpHandlerFactory():
+#            return LeoHTTPHandler(app)
+#        self.handler_classes["http"] = httpHandlerFactory
+
 
     def __init__(self, app, *args, **kws):
         def httpHandlerFactory():
@@ -174,7 +185,6 @@ class LeoMechanizeBrowser(Zope2MechanizeBrowser):
         self.default_others = [cls for cls in self.default_others 
                                if cls in mechanize.Browser.handler_classes]
         mechanize.Browser.__init__(self, *args, **kws)
-
 
     def _mech_open(self, url, data=None, update_history=True, visit=None,
                    timeout=_sockettimeout._GLOBAL_DEFAULT_TIMEOUT):
@@ -279,6 +289,7 @@ class DoRequest(Zope2HTTPHandler):
                     'Content-type',
                     'multipart/form-data; boundary=BOUNDARY')
 #                    'application/x-www-form-urlencoded')
+#                    'multipart/form-data')
             if not request.has_header('Content-length'):
                 request.add_unredirected_header(
                     'Content-length', '%d' % len(data))
@@ -344,3 +355,22 @@ class LeoHTTPHandler(DoRequest):
 ##                    response = meth(req, response)
 
 ##        return response
+
+
+#class LeoHTTPHandler(DoRequest):
+
+##    def http_open(self, req):
+##        import pdb; pdb.set_trace()
+
+##    def do_request_(self, request):
+##        import pdb; pdb.set_trace()
+##        pass
+
+##    def http_request(self, request):
+##        if not request.has_header('Content-type'):
+##            request.add_unredirected_header(
+##                'Content-type',
+##                'multipart/form-data')
+##        self.do_request_(request)
+
+#    http_request = DoRequest.do_request_
