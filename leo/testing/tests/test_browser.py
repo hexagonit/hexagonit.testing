@@ -1,4 +1,5 @@
 from tempfile import gettempdir
+from leo.testing.browser import BOUNDARY
 
 import mock
 import os
@@ -135,7 +136,8 @@ class TestBrowser(unittest.TestCase):
     def test_multifile(self):
         from leo.testing.browser import multifile
         key = 'files'
-        boundary = 'BOUNDARY'
+#        boundary = 'BOUNDARY'
+        boundary = BOUNDARY
         value = VALUE
 #        parts = [
 #            '--BOUNDARY',
@@ -145,7 +147,8 @@ class TestBrowser(unittest.TestCase):
 #            self.parts,
 #            '']
         res = [
-            '--BOUNDARY',
+#            '--BOUNDARY',
+            '--{0}'.format(BOUNDARY),
             'Content-Disposition: form-data; name="files"',
             'Content-Type: multipart/mixed; boundary=BBBBB',
             '',
@@ -157,8 +160,8 @@ class TestBrowser(unittest.TestCase):
         browser = self.make_browser()
         fields = {'username': 'Some Name'}
         res = (
-            '--BOUNDARY\r\nContent-Disposition: form-data; name=username\r\nContent-Length: 9\r\n\r\nSome Name\r\n--BOUNDARY--\r\n',
-            'multipart/form-data; boundary=BOUNDARY')
+            '--{0}\r\nContent-Disposition: form-data; name=username\r\nContent-Length: 9\r\n\r\nSome Name\r\n--{0}--\r\n'.format(BOUNDARY),
+            'multipart/form-data; boundary={0}'.format(BOUNDARY))
         self.assertEquals(res, browser.multipart_formdata(fields))
 
     def test_none_file_multi_fields_multipart_formdata(self):
@@ -167,8 +170,8 @@ class TestBrowser(unittest.TestCase):
             'username': 'Some Name',
             'userpass': 'Some Pass'}
         res = (
-            '--BOUNDARY\r\nContent-Disposition: form-data; name=username\r\nContent-Length: 9\r\n\r\nSome Name\r\n--BOUNDARY\r\nContent-Disposition: form-data; name=userpass\r\nContent-Length: 9\r\n\r\nSome Pass\r\n--BOUNDARY--\r\n',
-             'multipart/form-data; boundary=BOUNDARY')
+            '--{0}\r\nContent-Disposition: form-data; name=username\r\nContent-Length: 9\r\n\r\nSome Name\r\n--{0}\r\nContent-Disposition: form-data; name=userpass\r\nContent-Length: 9\r\n\r\nSome Pass\r\n--{0}--\r\n'.format(BOUNDARY),
+             'multipart/form-data; boundary={0}'.format(BOUNDARY))
         self.assertEquals(res, browser.multipart_formdata(fields))
 
     def test_single_file_multipart_formdata(self):
@@ -179,8 +182,8 @@ class TestBrowser(unittest.TestCase):
                 'content-type': 'text/plain',
                 'filename': 'filename.txt'}}
         res = (
-            '--BOUNDARY\r\nContent-Disposition: form-data; name=files; filename=filename.txt\r\nContent-Type: text/plain\r\n\r\ntext_file\r\n--BOUNDARY--\r\n',
-            'multipart/form-data; boundary=BOUNDARY')
+            '--{0}\r\nContent-Disposition: form-data; name=files; filename=filename.txt\r\nContent-Type: text/plain\r\n\r\ntext_file\r\n--{0}--\r\n'.format(BOUNDARY),
+            'multipart/form-data; boundary={0}'.format(BOUNDARY))
         self.assertEquals(res, browser.multipart_formdata(fields))
 
     def test_multiple_file_multipart_formdata(self):
@@ -196,8 +199,8 @@ class TestBrowser(unittest.TestCase):
                     'content-type': 'image/gif',
                     'filename': 'filename.png'}]}
         res = (
-            '--BOUNDARY\r\nContent-Disposition: form-data; name="files"\r\nContent-Type: multipart/mixed; boundary=BBBBB\r\n\r\n--BBBBB\r\nContent-Disposition: file; filename="filename.txt"\r\nContent-Type: text/plain\r\n\r\ntext_file\r\n--BBBBB\r\nContent-Disposition: file; filename="filename.png"\r\nContent-Type: image/gif\r\n\r\nimage_file\r\n--BBBBB--\r\n--BOUNDARY--\r\n',
-            'multipart/form-data; boundary=BOUNDARY')
+            '--{0}\r\nContent-Disposition: form-data; name="files"\r\nContent-Type: multipart/mixed; boundary=BBBBB\r\n\r\n--BBBBB\r\nContent-Disposition: file; filename="filename.txt"\r\nContent-Type: text/plain\r\n\r\ntext_file\r\n--BBBBB\r\nContent-Disposition: file; filename="filename.png"\r\nContent-Type: image/gif\r\n\r\nimage_file\r\n--BBBBB--\r\n--{0}--\r\n'.format(BOUNDARY),
+            'multipart/form-data; boundary={0}'.format(BOUNDARY))
         self.assertEquals(res, browser.multipart_formdata(fields))
 
     def test_non_file_field_single_file_field_and_multiple_file_field_together(self):
@@ -218,8 +221,8 @@ class TestBrowser(unittest.TestCase):
                     'content-type': 'image/gif',
                     'filename': 'filename.png'}]}
         res = (
-            '--BOUNDARY\r\nContent-Disposition: form-data; name="multiple_files"\r\nContent-Type: multipart/mixed; boundary=BBBBB\r\n\r\n--BBBBB\r\nContent-Disposition: file; filename="filename.txt"\r\nContent-Type: text/plain\r\n\r\ntext_file\r\n--BBBBB\r\nContent-Disposition: file; filename="filename.png"\r\nContent-Type: image/gif\r\n\r\nimage_file\r\n--BBBBB--\r\n--BOUNDARY\r\nContent-Disposition: form-data; name=single_file; filename=single_filename.txt\r\nContent-Type: text/plain\r\n\r\nsingle_text_file\r\n--BOUNDARY\r\nContent-Disposition: form-data; name=username\r\nContent-Length: 9\r\n\r\nSome Name\r\n--BOUNDARY--\r\n',
-            'multipart/form-data; boundary=BOUNDARY')
+            '--{0}\r\nContent-Disposition: form-data; name="multiple_files"\r\nContent-Type: multipart/mixed; boundary=BBBBB\r\n\r\n--BBBBB\r\nContent-Disposition: file; filename="filename.txt"\r\nContent-Type: text/plain\r\n\r\ntext_file\r\n--BBBBB\r\nContent-Disposition: file; filename="filename.png"\r\nContent-Type: image/gif\r\n\r\nimage_file\r\n--BBBBB--\r\n--{0}\r\nContent-Disposition: form-data; name=single_file; filename=single_filename.txt\r\nContent-Type: text/plain\r\n\r\nsingle_text_file\r\n--{0}\r\nContent-Disposition: form-data; name=username\r\nContent-Length: 9\r\n\r\nSome Name\r\n--{0}--\r\n'.format(BOUNDARY),
+            'multipart/form-data; boundary={0}'.format(BOUNDARY))
         self.assertEquals(res, browser.multipart_formdata(fields))
 
 
@@ -239,6 +242,7 @@ class TestLeoHTTPHandler(unittest.TestCase):
 
     def test_do_request(self):
         from leo.testing.browser import LeoHTTPHandler
+#        from leo.testing.browser import BOUNDARY
         from mechanize._request import Request
         request = Request('/plone/@@echo', data=True)
         request.get_host = mock.Mock()
@@ -256,7 +260,8 @@ class TestLeoHTTPHandler(unittest.TestCase):
         handler.parent = mock.Mock()
         handler.parent.addheaders = [('User-agent', 'Python-urllib/2.6')]
         handler.do_request_(request)
-        self.assertEquals('multipart/form-data; boundary=BOUNDARY', request.unredirected_hdrs['Content-type'])
+        ctype = 'multipart/form-data; boundary={0}'.format(BOUNDARY)
+        self.assertEquals(ctype, request.unredirected_hdrs['Content-type'])
 
     def test_http_request(self):
         """Testing that http_request is the same as do_request_ method."""

@@ -14,6 +14,7 @@ from zope.component import getUtility
 import mechanize
 import os
 import webbrowser
+import hashlib
 
 
 MULTIPART_TEXT_TMPL = '\r\n'.join([
@@ -49,6 +50,14 @@ Content-Type: text/plain
 
 Some text comes here.
 """
+
+boundary = 'BOUNDARY'
+m = hashlib.md5()
+m.update(boundary)
+
+
+BOUNDARY = m.hexdigest()
+#BOUNDARY = 'BOUNDARY'
 
 
 def files(value):
@@ -164,7 +173,7 @@ class Browser(z2.Browser):
 
            http://urllib3.googlecode.com/svn/trunk/urllib3/filepost.py
         """
-        BOUNDARY = 'BOUNDARY'
+#        BOUNDARY = 'BOUNDARY'
 
         body = []
         for key, value in sorted(fields.items()):
@@ -206,32 +215,10 @@ class LeoMechanizeBrowser(Zope2MechanizeBrowser):
 class LeoHTTPHandler(Zope2HTTPHandler):
 
     def do_request_(self, request):
-        host = request.get_host()
-        if not host:
-            raise URLError('no host given')
-        if request.has_data():  # POST
-            data = request.get_data()
-            if not request.has_header('Content-type'):
-                request.add_unredirected_header(
-                    'Content-type',
-                    'multipart/form-data; boundary=BOUNDARY')
-#                    'application/x-www-form-urlencoded')
-#                    'multipart/form-data')
-            if not request.has_header('Content-length'):
-                request.add_unredirected_header(
-                    'Content-length', '%d' % len(data))
-
-        sel_host = host
-        if request.has_proxy():
-            scheme, sel = splittype(request.get_selector())
-            sel_host, sel_path = splithost(sel)
-
-        if not request.has_header('Host'):
-            request.add_unredirected_header('Host', sel_host)
-        for name, value in self.parent.addheaders:
-            name = name.capitalize()
-            if not request.has_header(name):
-                request.add_unredirected_header(name, value)
+        Zope2HTTPHandler.do_request_(self, request)
+        request.add_unredirected_header(
+            'Content-type',
+            'multipart/form-data; boundary={0}'.format(BOUNDARY))
 
         return request
 
