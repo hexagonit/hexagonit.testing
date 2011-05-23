@@ -93,8 +93,8 @@ class Browser(z2.Browser):
 
     _base_url = None
 
-    def __init__(self, app, url=None):
-        super(z2.Browser, self).__init__(url=url, mech_browser=LeoMechanizeBrowser(app))
+#    def __init__(self, app, url=None):
+#        super(z2.Browser, self).__init__(url=url, mech_browser=LeoMechanizeBrowser(app))
 
     def setBaseUrl(self, base_url):
         """Sets a base URL for all subsequent requests."""
@@ -149,7 +149,7 @@ class Browser(z2.Browser):
             file.write(self.contents)
         webbrowser.get(web_browser_name).open('file://' + filepath)
 
-    def post(self, url, data):
+    def DISABLED_post(self, url, data):
         """Posting to url with multipart/form-data instead of application/x-www-form-urlencoded
 
         :param url: where data will be posted.
