@@ -19,7 +19,6 @@ Post username::
     >>> print browser.headers
     Status: 200 Ok
     Content-Length: 0
-    Set-Cookie: I18N_LANGUAGE="en"; Path=/
 
 #    >>> data
 #    'Content-Type: multipart/form-data; boundary=BOUNDARY\r\n\r\n--BOUNDARY\r\nContent-Disposition: form-data; name=username\r\nContent-Length: 9\r\n\r\nSome Name\r\n--BOUNDARY--\r\n'
@@ -113,7 +112,8 @@ Data as dictionary
 Post new_name::
 
     >>> data = {'new_name': 'My New Name'}
-    >>> browser.post('/@@echo', data)
+
+#    >>> browser.post('/@@echo', data)
 
 
 Post new_name and one file::
@@ -126,7 +126,8 @@ Post new_name and one file::
     ...         'content-type': 'text/plain',
     ...         'data': StringIO.StringIO('foobar')},
     ... }
-    >>> browser.post('/@@echo', fields)
+
+#    >>> browser.post('/@@echo', fields)
 
 Post new_name and two files::
 
@@ -142,4 +143,5 @@ Post new_name and two files::
     ...         'content-type': 'image/gif',
     ...         'data': StringIO.StringIO('foobar_image')}],
     ... }
-    >>> browser.post('/@@echo', fields)
+
+#    >>> browser.post('/@@echo', fields)

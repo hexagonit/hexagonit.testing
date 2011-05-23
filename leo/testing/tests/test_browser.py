@@ -107,8 +107,7 @@ class TestBrowser(unittest.TestCase):
     def test_startZserver(self, webbrowser):
         browser = self.make_browser()
         browser.startZserver()
-        webbrowser.get.assert_called_with('firefox')
-        self.failUnless(webbrowser.get().open.called)
+        self.failUnless(webbrowser.open_new_tab.called)
 
     @mock.patch('leo.testing.browser.webbrowser')
     def test_openBrowser(self, webbrowser):
@@ -118,8 +117,7 @@ class TestBrowser(unittest.TestCase):
         filename = os.path.join(gettempdir(), 'testbrowser.html')
         of = open(filename, 'r')
         self.assertEquals('<html />', of.readline())
-        webbrowser.get.assert_called_with('firefox')
-        self.failUnless(webbrowser.get().open.called)
+        self.failUnless(webbrowser.open_new_tab.called)
 
     def test_post(self):
         url = 'http://localhost/@@echo.html'
