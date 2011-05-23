@@ -1,3 +1,6 @@
+
+Post username::
+
     >>> fields = {'username': 'Some Name'}
 
     >>> mf = browser.multipart_formdata(fields)
@@ -18,11 +21,10 @@
     Content-Length: 0
     Set-Cookie: I18N_LANGUAGE="en"; Path=/
 
-#    >>> import StringIO
-#    >>> dummy_file_1 = StringIO.StringIO('file1.txt')
+#    >>> data
+#    'Content-Type: multipart/form-data; boundary=BOUNDARY\r\n\r\n--BOUNDARY\r\nContent-Disposition: form-data; name=username\r\nContent-Length: 9\r\n\r\nSome Name\r\n--BOUNDARY--\r\n'
 
-    >>> data
-    'Content-Type: multipart/form-data; boundary=BOUNDARY\r\n\r\n--BOUNDARY\r\nContent-Disposition: form-data; name=username\r\nContent-Length: 9\r\n\r\nSome Name\r\n--BOUNDARY--\r\n'
+Post username and one file::
 
     >>> data = """Content-Type: multipart/form-data; boundary=BOUNDARY
     ...
@@ -40,6 +42,8 @@
     ... """
 
     >>> browser.post('/@@echo', data)
+
+Post username and two files:
 
     >>> data = """Content-Type: multipart/form-data; boundary=BOUNDARY
     ...
@@ -65,7 +69,6 @@
     ... --BBBBB--
     ... --BOUNDARY--
     ... """
-
 
     >>> browser.post('/@@echo', data)
 
@@ -104,9 +107,16 @@
 #    'token': 'foobar',
 #})
 
+Data as dictionary
+------------------
+
+Post new_name::
+
     >>> data = {'new_name': 'My New Name'}
     >>> browser.post('/@@echo', data)
 
+
+Post new_name and one file::
 
     >>> import StringIO
     >>> fields = {
@@ -116,22 +126,20 @@
     ...         'content-type': 'text/plain',
     ...         'data': StringIO.StringIO('foobar')},
     ... }
-
     >>> browser.post('/@@echo', fields)
 
-#browser.post('/@@echo', {
-#    'payload': ('filename.png', 'image/png', open('.../filename.png'),
-#    'token': 'foobar',
-#})
+Post new_name and two files::
 
-
-
-#    >>> print browser.contents
-#    <BLANKLINE>
-
-#    >>> import StringIO
-#    >>> dummy_file_1 = StringIO.StringIO('Dummy File 1')
-#    >>> browser.open('/@@test-form')
-#    >>> browser.getControl(name="token").value = 'aaa'
-#    >>> browser.getControl(name="mimetype").value = 'bbb'
-#    >>> browser.getControl(name="form.button.Submit").click()
+    >>> import StringIO
+    >>> fields = {
+    ...     'new_name': 'My New Name',
+    ...     'files' : [{
+    ...         'filename': 'filename.txt',
+    ...         'content-type': 'text/plain',
+    ...         'data': StringIO.StringIO('foobar_text')},
+    ...         {
+    ...         'filename': 'filename.png',
+    ...         'content-type': 'image/gif',
+    ...         'data': StringIO.StringIO('foobar_image')}],
+    ... }
+    >>> browser.post('/@@echo', fields)

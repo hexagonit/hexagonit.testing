@@ -4,10 +4,36 @@ import mock
 import os
 import tempfile
 import unittest2 as unittest
+import StringIO
+
+
+VALUE = [
+    {
+        'data': StringIO.StringIO('text_file'),
+        'content-type': 'text/plain',
+        'filename': 'filename.txt'},
+    {
+        'data': StringIO.StringIO('image_file'),
+        'content-type': 'image/gif',
+        'filename': 'filename.png'}]
 
 
 class TestBrowser(unittest.TestCase):
     """Tests for browser testing implementation."""
+
+    def setUp(self):
+        self.parts = '\r\n'.join([
+            '--BBBBB',
+            'Content-Disposition: file; filename="filename.txt"',
+            'Content-Type: text/plain',
+            '',
+            'text_file',
+            '--BBBBB',
+            'Content-Disposition: file; filename="filename.png"',
+            'Content-Type: image/gif',
+            '',
+            'image_file',
+            '--BBBBB--'])
 
     def tearDown(self):
         filename = os.path.join(gettempdir(), 'testbrowser.html')
@@ -99,5 +125,143 @@ class TestBrowser(unittest.TestCase):
         data = 'x=1&y=2'
         browser = self.make_browser()
         from urllib2 import HTTPError
-#        self.assertRaises(HTTPError, lambda: browser.post(url, data))
         browser.setBaseUrl('http://nohost/plone')
+
+    def test_files(self):
+        from leo.testing.browser import files
+        value = VALUE
+        self.assertEquals(self.parts, files(value))
+
+    def test_multifile(self):
+        from leo.testing.browser import multifile
+        key = 'files'
+        boundary = 'BOUNDARY'
+        value = VALUE
+#        parts = [
+#            '--BOUNDARY',
+#            'Content-Disposition: form-data; name="files"',
+#            'Content-Type: multipart/mixed; boundary=BBBBB',
+#            '',
+#            self.parts,
+#            '']
+        res = [
+            '--BOUNDARY',
+            'Content-Disposition: form-data; name="files"',
+            'Content-Type: multipart/mixed; boundary=BBBBB',
+            '',
+            '--BBBBB\r\nContent-Disposition: file; filename="filename.txt"\r\nContent-Type: text/plain\r\n\r\ntext_file\r\n--BBBBB\r\nContent-Disposition: file; filename="filename.png"\r\nContent-Type: image/gif\r\n\r\nimage_file\r\n--BBBBB--',
+            '']
+        self.assertEquals(res, multifile(key, value, boundary))
+
+    def test_non_file_single_field_multipart_formdata(self):
+        browser = self.make_browser()
+        fields = {'username': 'Some Name'}
+        res = (
+            '--BOUNDARY\r\nContent-Disposition: form-data; name=username\r\nContent-Length: 9\r\n\r\nSome Name\r\n--BOUNDARY--\r\n',
+            'multipart/form-data; boundary=BOUNDARY')
+        self.assertEquals(res, browser.multipart_formdata(fields))
+
+    def test_none_file_multi_fields_multipart_formdata(self):
+        browser = self.make_browser()
+        fields = {
+            'username': 'Some Name',
+            'userpass': 'Some Pass'}
+        res = (
+            '--BOUNDARY\r\nContent-Disposition: form-data; name=username\r\nContent-Length: 9\r\n\r\nSome Name\r\n--BOUNDARY\r\nContent-Disposition: form-data; name=userpass\r\nContent-Length: 9\r\n\r\nSome Pass\r\n--BOUNDARY--\r\n',
+             'multipart/form-data; boundary=BOUNDARY')
+        self.assertEquals(res, browser.multipart_formdata(fields))
+
+    def test_single_file_multipart_formdata(self):
+        browser = self.make_browser()
+        fields = {
+            'files': {
+                'data': StringIO.StringIO('text_file'),
+                'content-type': 'text/plain',
+                'filename': 'filename.txt'}}
+        res = (
+            '--BOUNDARY\r\nContent-Disposition: form-data; name=files; filename=filename.txt\r\nContent-Type: text/plain\r\n\r\ntext_file\r\n--BOUNDARY--\r\n',
+            'multipart/form-data; boundary=BOUNDARY')
+        self.assertEquals(res, browser.multipart_formdata(fields))
+
+    def test_multiple_file_multipart_formdata(self):
+        browser = self.make_browser()
+        fields = {
+            'files': [
+                {
+                    'data': StringIO.StringIO('text_file'),
+                    'content-type': 'text/plain',
+                    'filename': 'filename.txt'},
+                {
+                    'data': StringIO.StringIO('image_file'),
+                    'content-type': 'image/gif',
+                    'filename': 'filename.png'}]}
+        res = (
+            '--BOUNDARY\r\nContent-Disposition: form-data; name="files"\r\nContent-Type: multipart/mixed; boundary=BBBBB\r\n\r\n--BBBBB\r\nContent-Disposition: file; filename="filename.txt"\r\nContent-Type: text/plain\r\n\r\ntext_file\r\n--BBBBB\r\nContent-Disposition: file; filename="filename.png"\r\nContent-Type: image/gif\r\n\r\nimage_file\r\n--BBBBB--\r\n--BOUNDARY--\r\n',
+            'multipart/form-data; boundary=BOUNDARY')
+        self.assertEquals(res, browser.multipart_formdata(fields))
+
+    def test_non_file_field_single_file_field_and_multiple_file_field_together(self):
+        browser = self.make_browser()
+        fields = {
+            'username': 'Some Name',
+            'single_file': {
+                'data': StringIO.StringIO('single_text_file'),
+                'content-type': 'text/plain',
+                'filename': 'single_filename.txt'},
+            'multiple_files': [
+                {
+                    'data': StringIO.StringIO('text_file'),
+                    'content-type': 'text/plain',
+                    'filename': 'filename.txt'},
+                {
+                    'data': StringIO.StringIO('image_file'),
+                    'content-type': 'image/gif',
+                    'filename': 'filename.png'}]}
+        res = (
+            '--BOUNDARY\r\nContent-Disposition: form-data; name="multiple_files"\r\nContent-Type: multipart/mixed; boundary=BBBBB\r\n\r\n--BBBBB\r\nContent-Disposition: file; filename="filename.txt"\r\nContent-Type: text/plain\r\n\r\ntext_file\r\n--BBBBB\r\nContent-Disposition: file; filename="filename.png"\r\nContent-Type: image/gif\r\n\r\nimage_file\r\n--BBBBB--\r\n--BOUNDARY\r\nContent-Disposition: form-data; name=single_file; filename=single_filename.txt\r\nContent-Type: text/plain\r\n\r\nsingle_text_file\r\n--BOUNDARY\r\nContent-Disposition: form-data; name=username\r\nContent-Length: 9\r\n\r\nSome Name\r\n--BOUNDARY--\r\n',
+            'multipart/form-data; boundary=BOUNDARY')
+        self.assertEquals(res, browser.multipart_formdata(fields))
+
+
+class TestLeoMechanizeBrowser(unittest.TestCase):
+    """Tests for mechanize browser testing implementation."""
+
+    def test_httpHandlerFactory(self):
+        from leo.testing.browser import LeoMechanizeBrowser
+        from leo.testing.browser import LeoHTTPHandler
+        app = mock.Mock()
+        mech_browser = LeoMechanizeBrowser(app)
+        self.failUnless(isinstance(mech_browser.handler_classes['http'](), LeoHTTPHandler))
+
+
+class TestLeoHTTPHandler(unittest.TestCase):
+    """Tests for http handler testing implementation."""
+
+    def test_do_request(self):
+        from leo.testing.browser import LeoHTTPHandler
+        from mechanize._request import Request
+        request = Request('/plone/@@echo', data=True)
+        request.get_host = mock.Mock()
+        request.get_host.return_value = 'nohost'
+        request.has_data = mock.Mock()
+        request.has_data.return_value = True
+        request.get_data = mock.Mock()
+        request.get_data.return_value = 'Data'
+        request.has_header = mock.Mock()
+        request.has_header.return_value = False
+        request.has_proxy = mock.Mock()
+        request.has_proxy.return_value = False
+        app = mock.Mock()
+        handler = LeoHTTPHandler(app)
+        handler.parent = mock.Mock()
+        handler.parent.addheaders = [('User-agent', 'Python-urllib/2.6')]
+        handler.do_request_(request)
+        self.assertEquals('multipart/form-data; boundary=BOUNDARY', request.unredirected_hdrs['Content-type'])
+
+    def test_http_request(self):
+        """Testing that http_request is the same as do_request_ method."""
+        from leo.testing.browser import LeoHTTPHandler
+        app = mock.Mock()
+        handler = LeoHTTPHandler(app)
+        self.assertEquals('do_request_', handler.http_request.im_func.__name__)
+        self.assertEquals('LeoHTTPHandler', handler.http_request.im_class.__name__)

@@ -1,10 +1,3 @@
-from mechanize import _response
-from mechanize import _rfc3986
-from mechanize import _sockettimeout
-from mechanize import _urllib2_fork
-from mechanize._mechanize import BrowserStateError
-from mechanize._opener import OpenerDirector
-from mechanize._useragent import UserAgentBase
 from plone.portlets.interfaces import IPortletAssignmentMapping
 from plone.portlets.interfaces import IPortletManager
 from plone.testing import z2
@@ -18,11 +11,8 @@ from urllib2 import URLError
 from zope.component import getMultiAdapter
 from zope.component import getUtility
 
-import copy
 import mechanize
-import mimetools
 import os
-import urllib2
 import webbrowser
 
 
@@ -34,6 +24,7 @@ MULTIPART_TEXT_TMPL = '\r\n'.join([
 '%(value)s',
 ''])
 
+
 MULTIPART_ONE_FILE_TMPL = '\r\n'.join([
 '--%(boundary)s',
 'Content-Disposition: form-data; name=%(name)s; filename=%(filename)s',
@@ -43,11 +34,49 @@ MULTIPART_ONE_FILE_TMPL = '\r\n'.join([
 ''])
 
 
-#def safe_utf8(s, encoding=('utf-8', 'iso-8859-15'), convert=True):
-#    """Convert to utf8 if not yet string or None"""
-#    value = safe_unicode(s, encoding=encoding, convert=convert)
-#    if isinstance(value, unicode):
-#        value = value.encode('utf-8')
+MULTIPART_MULTI_FILE_TMPL = '\r\n'.join([
+'--%(boundary)s',
+'Content-Disposition: form-data; name=%(name)s; filename=%(filename)s',
+'Content-Type: multipart/mixed; boundary=BBBBB'
+'',
+'%(value)s',
+''])
+
+
+FILES = """--BBBBB
+Content-Disposition: file; filename="file1.txt"
+Content-Type: text/plain
+
+Some text comes here.
+"""
+
+
+def files(value):
+    body = []
+    for val in value:
+        data = val['data']
+        data.seek(0)
+        parts = [
+            '--BBBBB',
+            'Content-Disposition: file; filename="{0}"'.format(val['filename']),
+            'Content-Type: {0}'.format(val['content-type']),
+            '',
+            '{0}'.format(data.read())]
+        body.append('\r\n'.join(parts))
+    body = '\r\n'.join(body) + '\r\n--BBBBB--'
+    return body
+
+
+def multifile(key, value, boundary):
+    values = files(value)
+    parts = [
+        '--{0}'.format(boundary),
+        'Content-Disposition: form-data; name="{0}"'.format(key),
+        'Content-Type: multipart/mixed; boundary=BBBBB',
+        '',
+        values,
+        '']
+    return parts
 
 
 class Browser(z2.Browser):
@@ -113,10 +142,10 @@ class Browser(z2.Browser):
 
     def post(self, url, data):
         """Posting to url with multipart/form-data instead of application/x-www-form-urlencoded
-        
+
         :param url: where data will be posted.
         :type url: str
-        
+
         :param data: data to be posted.
         :type data: str or dict
         """
@@ -141,147 +170,45 @@ class Browser(z2.Browser):
         for key, value in sorted(fields.items()):
             if isinstance(value, dict):
                 body.append(MULTIPART_ONE_FILE_TMPL % {
-                    'boundary' : BOUNDARY,
-                    'name' : key,
-                    'filename' : value['filename'],
-                    'content-type' : value['content-type'],
-                    'value' : value['data'].read(),
-#                    'length' : len(value),
+                    'boundary': BOUNDARY,
+                    'name': key,
+                    'filename': value['filename'],
+                    'content-type': value['content-type'],
+                    'value': value['data'].read(),
                 })
+            elif isinstance(value, list):
+                body.append('\r\n'.join(multifile(key, value, BOUNDARY)))
             else:
                 body.append(MULTIPART_TEXT_TMPL % {
-                    'boundary' : BOUNDARY,
-    #                'name' : safe_utf8(key),
-    #                'value' : safe_utf8(value),
-    #                'length' : len(safe_utf8(value)),
-                    'name' : key,
-                    'value' : value,
-                    'length' : len(value),
+                    'boundary': BOUNDARY,
+                    'name': key,
+                    'value': value,
+                    'length': len(value),
                 })
         body.append('--%s--\r\n' % BOUNDARY)
         content_type = 'multipart/form-data; boundary=%s' % BOUNDARY
 
         return ''.join(body), content_type
 
-#    def post(self, url, data):
-#        _z2_testbrowser.Zope2HTTPHandler = LeoHTTPHandler
-#        return super(Browser, self).post(url, data)
-
 
 class LeoMechanizeBrowser(Zope2MechanizeBrowser):
-
-#    def __init__(self, app, *args, **kws):
-#        super(LeoMechanizeBrowser, self).__init__(app, *args, **kws)
-#        def httpHandlerFactory():
-#            return LeoHTTPHandler(app)
-#        self.handler_classes["http"] = httpHandlerFactory
-
 
     def __init__(self, app, *args, **kws):
         def httpHandlerFactory():
             return LeoHTTPHandler(app)
         self.handler_classes = mechanize.Browser.handler_classes.copy()
         self.handler_classes["http"] = httpHandlerFactory
-        self.default_others = [cls for cls in self.default_others 
+        self.default_others = [cls for cls in self.default_others
                                if cls in mechanize.Browser.handler_classes]
         mechanize.Browser.__init__(self, *args, **kws)
 
-    def _mech_open(self, url, data=None, update_history=True, visit=None,
-                   timeout=_sockettimeout._GLOBAL_DEFAULT_TIMEOUT):
-        try:
-            url.get_full_url
-        except AttributeError:
-            # string URL -- convert to absolute URL if required
-            scheme, authority = _rfc3986.urlsplit(url)[:2]
-            if scheme is None:
-                # relative URL
-                if self._response is None:
-                    raise BrowserStateError(
-                        "can't fetch relative reference: "
-                        "not viewing any document")
-                url = _rfc3986.urljoin(self._response.geturl(), url)
 
-        request = self._request(url, data, visit, timeout)
-        visit = request.visit
-        if visit is None:
-            visit = True
-
-        if visit:
-            self._visit_request(request, update_history)
-
-        success = True
-
-        try:
-#            response = UserAgentBase.open(self, request, data)
-#            response = LeoUserAgent.open(self, request, data)
-            fullurl = request
-            timeout = _sockettimeout._GLOBAL_DEFAULT_TIMEOUT
-            req = self._request(fullurl, data, None, timeout)
-            req_scheme = req.get_type()
-            self._maybe_reindex_handlers()
-            
-            
-            request_processors = set(self.process_request.get(req_scheme, []))
-            request_processors.update(self._any_request)
-            request_processors = list(request_processors)
-            request_processors.sort()
-            for processor in request_processors:
-                for meth_name in ["any_request", req_scheme+"_request"]:
-                    meth = getattr(processor, meth_name, None)
-                    if meth:
-                        req = meth(req)
-
-            # In Python >= 2.4, .open() supports processors already, so we must
-            # call ._open() instead.
-            urlopen = _urllib2_fork.OpenerDirector._open
-            response = urlopen(self, req, data)
-
-            # post-process response
-            response_processors = set(self.process_response.get(req_scheme, []))
-            response_processors.update(self._any_response)
-            response_processors = list(response_processors)
-            response_processors.sort()
-            for processor in response_processors:
-                for meth_name in ["any_response", req_scheme+"_response"]:
-                    meth = getattr(processor, meth_name, None)
-                    if meth:
-                        response = meth(req, response)
-        except urllib2.HTTPError, error:
-            success = False
-            if error.fp is None:  # not a response
-                raise
-            response = error
-##         except (IOError, socket.error, OSError), error:
-##             # Yes, urllib2 really does raise all these :-((
-##             # See test_urllib2.py for examples of socket.gaierror and OSError,
-##             # plus note that FTPHandler raises IOError.
-##             # XXX I don't seem to have an example of exactly socket.error being
-##             #  raised, only socket.gaierror...
-##             # I don't want to start fixing these here, though, since this is a
-##             # subclass of OpenerDirector, and it would break old code.  Even in
-##             # Python core, a fix would need some backwards-compat. hack to be
-##             # acceptable.
-##             raise
-
-        if visit:
-            self._set_response(response, False)
-            response = copy.copy(self._response)
-        elif response is not None:
-            response = _response.upgrade_response(response)
-
-        if not success:
-            raise response
-        return response
-
-
-
-class DoRequest(Zope2HTTPHandler):
+class LeoHTTPHandler(Zope2HTTPHandler):
 
     def do_request_(self, request):
         host = request.get_host()
         if not host:
             raise URLError('no host given')
-
         if request.has_data():  # POST
             data = request.get_data()
             if not request.has_header('Content-type'):
@@ -308,69 +235,4 @@ class DoRequest(Zope2HTTPHandler):
 
         return request
 
-
-class LeoHTTPHandler(DoRequest):
-
-    http_request = DoRequest.do_request_
-
-
-#class LeoUserAgent(UserAgentBase):
-##class LeoUserAgent(OpenerDirector):
-#    pass
-
-##    def open(self, fullurl, data=None,
-##             timeout=_sockettimeout._GLOBAL_DEFAULT_TIMEOUT):
-##        req = self._request(fullurl, data, None, timeout)
-##        req_scheme = req.get_type()
-
-##        self._maybe_reindex_handlers()
-
-##        # pre-process request
-##        # XXX should we allow a Processor to change the URL scheme
-##        #   of the request?
-##        request_processors = set(self.process_request.get(req_scheme, []))
-##        request_processors.update(self._any_request)
-##        request_processors = list(request_processors)
-##        request_processors.sort()
-##        for processor in request_processors:
-##            for meth_name in ["any_request", req_scheme+"_request"]:
-##                meth = getattr(processor, meth_name, None)
-##                if meth:
-##                    req = meth(req)
-
-##        # In Python >= 2.4, .open() supports processors already, so we must
-##        # call ._open() instead.
-##        urlopen = _urllib2_fork.OpenerDirector._open
-##        response = urlopen(self, req, data)
-
-##        # post-process response
-##        response_processors = set(self.process_response.get(req_scheme, []))
-##        response_processors.update(self._any_response)
-##        response_processors = list(response_processors)
-##        response_processors.sort()
-##        for processor in response_processors:
-##            for meth_name in ["any_response", req_scheme+"_response"]:
-##                meth = getattr(processor, meth_name, None)
-##                if meth:
-##                    response = meth(req, response)
-
-##        return response
-
-
-#class LeoHTTPHandler(DoRequest):
-
-##    def http_open(self, req):
-##        import pdb; pdb.set_trace()
-
-##    def do_request_(self, request):
-##        import pdb; pdb.set_trace()
-##        pass
-
-##    def http_request(self, request):
-##        if not request.has_header('Content-type'):
-##            request.add_unredirected_header(
-##                'Content-type',
-##                'multipart/form-data')
-##        self.do_request_(request)
-
-#    http_request = DoRequest.do_request_
+    http_request = do_request_
