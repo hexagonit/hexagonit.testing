@@ -1,3 +1,7 @@
+    >>> from plone.app.testing import TEST_USER_ID, TEST_USER_NAME, TEST_USER_PASSWORD
+    >>> browser.login(TEST_USER_NAME, TEST_USER_PASSWORD)
+    >>> 'You are now logged in' in browser.contents
+    True
 
 Post username::
 
