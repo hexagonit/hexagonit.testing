@@ -200,8 +200,8 @@ class Browser(z2.Browser):
         :type data: str or dict
         """
         if isinstance(data, dict):
-            mf = self.multipart_formdata(data)
-            data = "Content-Type: {0}\r\n\r\n{1}".format(mf[1], mf[0])
+            body, content_type = self.multipart_formdata(data)
+            data = "Content-Type: {0}\r\n\r\n{1}".format(content_type, body)
         return super(Browser, self).post(url, data)
 
     def multipart_formdata(self, fields):
