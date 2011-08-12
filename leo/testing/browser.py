@@ -191,7 +191,7 @@ class Browser(z2.Browser):
         webbrowser.open_new_tab('file://' + filepath)
 
     def post(self, url, data):
-        """Posting to url with multipart/form-data instead of application/x-www-form-urlencodedYou
+        """Posting to url with multipart/form-data instead of application/x-www-form-urlencoded
 
         :param url: where data will be posted.
         :type url: str
@@ -202,6 +202,7 @@ class Browser(z2.Browser):
         if isinstance(data, dict):
             body, content_type = self.multipart_formdata(data)
             data = "Content-Type: {0}\r\n\r\n{1}".format(content_type, body)
+
         return super(Browser, self).post(url, data)
 
     def multipart_formdata(self, fields):
@@ -243,11 +244,16 @@ class Browser(z2.Browser):
 class LeoMechanizeBrowser(Zope2MechanizeBrowser):
 
     def __init__(self, app, *args, **kws):
-        Zope2MechanizeBrowser.__init__(self, app, *args, **kws)
+        import mechanize
 
         def httpHandlerFactory():
             return LeoHTTPHandler(app)
+
+        self.handler_classes = mechanize.Browser.handler_classes.copy()
         self.handler_classes["http"] = httpHandlerFactory
+        self.default_others = [cls for cls in self.default_others
+                               if cls in mechanize.Browser.handler_classes]
+        mechanize.Browser.__init__(self, *args, **kws)
 
 
 class LeoHTTPHandler(Zope2HTTPHandler):

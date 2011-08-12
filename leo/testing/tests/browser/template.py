@@ -2,11 +2,15 @@ from Products.Five.browser import BrowserView
 from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
 from zope.component import getMultiAdapter
 
+import json
+
 
 class EchoView(BrowserView):
 
     def __call__(self):
-        pass
+        return '\r\n'.join([
+            'REQUEST_METHOD: {0}'.format(self.request['REQUEST_METHOD']),
+            json.dumps(sorted(self.request.form.keys()))])
 
 
 class TestFormView(BrowserView):
