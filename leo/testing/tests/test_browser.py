@@ -1,5 +1,3 @@
-from leo.testing.browser import BOUNDARY
-from leo.testing.browser import SUBBOUNDARY
 from tempfile import gettempdir
 
 import StringIO
@@ -9,33 +7,8 @@ import tempfile
 import unittest2 as unittest
 
 
-VALUE = [
-    {
-        'data': StringIO.StringIO('text_file'),
-        'content-type': 'text/plain',
-        'filename': 'filename.txt'},
-    {
-        'data': StringIO.StringIO('image_file'),
-        'content-type': 'image/gif',
-        'filename': 'filename.png'}]
-
-
 class TestBrowser(unittest.TestCase):
     """Tests for browser testing implementation."""
-
-    def setUp(self):
-        self.parts = '\r\n'.join([
-            '--{0}'.format(SUBBOUNDARY),
-            'Content-Disposition: file; filename="filename.txt"',
-            'Content-Type: text/plain',
-            '',
-            'text_file',
-            '--{0}'.format(SUBBOUNDARY),
-            'Content-Disposition: file; filename="filename.png"',
-            'Content-Type: image/gif',
-            '',
-            'image_file',
-            '--{0}--'.format(SUBBOUNDARY)])
 
     def tearDown(self):
         filename = os.path.join(gettempdir(), 'testbrowser.html')
@@ -143,30 +116,8 @@ class TestBrowser(unittest.TestCase):
 #        data = {'some_name': }
 #        browser.post('/', data)
 
-    def test_create_boundary(self):
-        from leo.testing.browser import create_boundary
-        self.assertEquals('a52f733b0e51d9a568fababbc8d3a518', create_boundary('BOUNDARY'))
-
-    def test_files(self):
-        from leo.testing.browser import files
-        value = VALUE
-        self.assertEquals(self.parts, files(value))
-
-    def test_multifile(self):
-        from leo.testing.browser import multifile
-        key = 'files'
-        boundary = BOUNDARY
-        value = VALUE
-        res = [
-            '--{0}'.format(BOUNDARY),
-            'Content-Disposition: form-data; name="files"',
-            'Content-Type: multipart/mixed; boundary={0}'.format(SUBBOUNDARY),
-            '',
-            '--{0}\r\nContent-Disposition: file; filename="filename.txt"\r\nContent-Type: text/plain\r\n\r\ntext_file\r\n--{0}\r\nContent-Disposition: file; filename="filename.png"\r\nContent-Type: image/gif\r\n\r\nimage_file\r\n--{0}--'.format(SUBBOUNDARY),
-            '']
-        self.assertEquals(res, multifile(key, value, boundary))
-
     def test_non_file_single_field_multipart_formdata(self):
+        from leo.testing.mime import BOUNDARY
         browser = self.make_browser()
         fields = {'username': 'Some Name'}
         res = (
@@ -175,6 +126,7 @@ class TestBrowser(unittest.TestCase):
         self.assertEquals(res, browser.multipart_formdata(fields))
 
     def test_none_file_multi_fields_multipart_formdata(self):
+        from leo.testing.mime import BOUNDARY
         browser = self.make_browser()
         fields = {
             'username': 'Some Name',
@@ -185,6 +137,7 @@ class TestBrowser(unittest.TestCase):
         self.assertEquals(res, browser.multipart_formdata(fields))
 
     def test_single_file_multipart_formdata(self):
+        from leo.testing.mime import BOUNDARY
         browser = self.make_browser()
         fields = {
             'files': {
@@ -197,6 +150,8 @@ class TestBrowser(unittest.TestCase):
         self.assertEquals(res, browser.multipart_formdata(fields))
 
     def test_multiple_file_multipart_formdata(self):
+        from leo.testing.mime import BOUNDARY
+        from leo.testing.mime import SUBBOUNDARY
         browser = self.make_browser()
         fields = {
             'files': [
@@ -214,6 +169,8 @@ class TestBrowser(unittest.TestCase):
         self.assertEquals(res, browser.multipart_formdata(fields))
 
     def test_non_file_field_single_file_field_and_multiple_file_field_together(self):
+        from leo.testing.mime import BOUNDARY
+        from leo.testing.mime import SUBBOUNDARY
         browser = self.make_browser()
         fields = {
             'username': 'Some Name',
@@ -252,6 +209,7 @@ class TestLeoHTTPHandler(unittest.TestCase):
 
     def test_has_data_do_request(self):
         from leo.testing.browser import LeoHTTPHandler
+        from leo.testing.mime import BOUNDARY
         from mechanize._request import Request
         request = Request('/plone/@@echo', data=True)
         request.get_host = mock.Mock()
