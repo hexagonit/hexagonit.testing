@@ -1,6 +1,16 @@
 leo.testing
 ===========
 
+This package provides useful helper methods for browser testing in Plone.
+
+
+
+.. automodule:: leo.testing.browser
+
+.. autoclass:: Browser
+   :members:
+   :member-order: bysource
+
 
 Contents:
 

@@ -5,7 +5,7 @@
 
 Post username::
 
-    >>> browser.post('/@@echo', {'username': 'Some Name'})
+    >>> browser.post('/@@echo', [('username', 'Some Name')])
 
     >>> print browser.headers['status']
     200 Ok
@@ -18,16 +18,70 @@ Post username::
 Post username and one file::
 
     >>> from StringIO import StringIO
-    >>> data = {
-    ...   'username': 'Some Name',
-    ...   'my_text': {
-    ...      'filename': 'file1.txt',
-    ...      'content-type': 'text/plain',
-    ...      'data': StringIO('Some Data')
-    ...      }
-    ... }
+    >>> data = [
+    ...     (
+    ...         'username',
+    ...         'Some Name'
+    ...     ),
+    ...     (
+    ...         'my_text',
+    ...         {
+    ...         'filename': 'file1.txt',
+    ...         'content-type': 'text/plain',
+    ...         'data': StringIO('Some Data')
+    ...         }
+    ...     )
+    ... ]
 
     >>> browser.post('/@@echo', data)
     >>> print browser.contents
     REQUEST_METHOD: POST
     ["my_text", "username"]
+
+
+Post multiple files, one file and username::
+
+    >>> data = [
+    ...     (
+    ...         'multiple_files',
+    ...             [
+    ...             {
+    ...                 'data': StringIO('text_file'),
+    ...                 'content-type': 'text/plain',
+    ...                 'filename': 'filename.txt'
+    ...             },
+    ...             {
+    ...                 'data': StringIO('image_file'),
+    ...                 'content-type': 'image/gif',
+    ...                 'filename': 'filename.png'
+    ...             }
+    ...         ]
+    ...     ),
+    ...     (
+    ...         'single_file', 
+    ...         {
+    ...             'data': StringIO('single_text_file'),
+    ...             'content-type': 'text/plain',
+    ...             'filename': 'single_filename.txt'
+    ...         }
+    ...     ),
+    ...     (
+    ...         'username',
+    ...         'Some Name'
+    ...     ),
+    ... ]
+    >>> browser.post('/@@echo', data)
+    >>> print browser.contents
+    REQUEST_METHOD: POST
+    ["multiple_files", "single_file", "username"]
+
+#Open browser::
+#
+#    >>> browser.openBrowser()
+#    >>> browser.openBrowser('epiphany')
+
+#Start zServer::
+#
+#    >>> browser.startZserver()
+#
+#    >>> browser.startZserver('firefox')

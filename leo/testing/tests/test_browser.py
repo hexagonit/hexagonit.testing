@@ -1,6 +1,5 @@
 from tempfile import gettempdir
 
-import StringIO
 import mock
 import os
 import tempfile
@@ -11,9 +10,11 @@ class TestBrowser(unittest.TestCase):
     """Tests for browser testing implementation."""
 
     def tearDown(self):
-        filename = os.path.join(gettempdir(), 'testbrowser.html')
-        if os.path.isfile(filename):
-            os.remove(filename)
+        files = ['testbrowser.html', 'some.html']
+        for fil in files:
+            filename = os.path.join(gettempdir(), fil)
+            if os.path.isfile(filename):
+                os.remove(filename)
 
     def make_browser(self):
         from leo.testing.browser import Browser
@@ -78,11 +79,14 @@ class TestBrowser(unittest.TestCase):
         browser.deletePortletManager(portal, name)
         self.assertEquals({'plone.rightcolumn': ''}, portlet_managers)
 
-    @mock.patch('leo.testing.browser.webbrowser')
-    def test_startZserver(self, webbrowser):
-        browser = self.make_browser()
-        browser.startZserver()
-        self.failUnless(webbrowser.open_new_tab.called)
+    # @mock.patch('leo.testing.browser.webbrowser')
+    # def test_startZserver(self, webbrowser):
+    #     browser = self.make_browser()
+    #     browser.startZserver()
+    #     self.failUnless(webbrowser.open_new_tab.called)
+    #     browser.startZserver('firefox')
+    #     webbrowser.get.assert_called_with('firefox')
+    #     self.failUnless(webbrowser.open_new_tab.called)
 
     @mock.patch('leo.testing.browser.webbrowser')
     def test_openBrowser(self, webbrowser):
@@ -93,12 +97,22 @@ class TestBrowser(unittest.TestCase):
         of = open(filename, 'r')
         self.assertEquals('<html />', of.readline())
         self.failUnless(webbrowser.open_new_tab.called)
+        ## Write html contents to some.html file.
+        browser.openBrowser(filename="some.html")
+        filename = os.path.join(gettempdir(), 'some.html')
+        of = open(filename, 'r')
+        self.assertEquals('<html />', of.readline())
+        self.failUnless(webbrowser.open_new_tab.called)
+        ## Open with firefox.
+        browser.openBrowser('firefox')
+        webbrowser.get.assert_called_with('firefox')
+        self.failUnless(webbrowser.open_new_tab.called)
 
     def test_post_to_not_existing_page(self):
-        browser = self.make_browser()
         from urllib2 import HTTPError
+        browser = self.make_browser()
         browser.setBaseUrl('http://nohost/plone')
-        data = {}
+        data = [('content-type', 'text/plain'), ('filename', 'filename.txt')]
         self.assertRaises(HTTPError, lambda: browser.post('/@@no-page', data))
 
 #    def test_post_to_existing_page_with_empty_data(self):
@@ -115,142 +129,3 @@ class TestBrowser(unittest.TestCase):
 #        browser.setBaseUrl('http://nohost/plone')
 #        data = {'some_name': }
 #        browser.post('/', data)
-
-    def test_non_file_single_field_multipart_formdata(self):
-        from leo.testing.mime import BOUNDARY
-        browser = self.make_browser()
-        fields = {'username': 'Some Name'}
-        res = (
-            '--{0}\r\nContent-Disposition: form-data; name=username\r\nContent-Length: 9\r\n\r\nSome Name\r\n--{0}--\r\n'.format(BOUNDARY),
-            'multipart/form-data; boundary={0}'.format(BOUNDARY))
-        self.assertEquals(res, browser.multipart_formdata(fields))
-
-    def test_none_file_multi_fields_multipart_formdata(self):
-        from leo.testing.mime import BOUNDARY
-        browser = self.make_browser()
-        fields = {
-            'username': 'Some Name',
-            'userpass': 'Some Pass'}
-        res = (
-            '--{0}\r\nContent-Disposition: form-data; name=username\r\nContent-Length: 9\r\n\r\nSome Name\r\n--{0}\r\nContent-Disposition: form-data; name=userpass\r\nContent-Length: 9\r\n\r\nSome Pass\r\n--{0}--\r\n'.format(BOUNDARY),
-             'multipart/form-data; boundary={0}'.format(BOUNDARY))
-        self.assertEquals(res, browser.multipart_formdata(fields))
-
-    def test_single_file_multipart_formdata(self):
-        from leo.testing.mime import BOUNDARY
-        browser = self.make_browser()
-        fields = {
-            'files': {
-                'data': StringIO.StringIO('text_file'),
-                'content-type': 'text/plain',
-                'filename': 'filename.txt'}}
-        res = (
-            '--{0}\r\nContent-Disposition: form-data; name=files; filename=filename.txt\r\nContent-Type: text/plain\r\n\r\ntext_file\r\n--{0}--\r\n'.format(BOUNDARY),
-            'multipart/form-data; boundary={0}'.format(BOUNDARY))
-        self.assertEquals(res, browser.multipart_formdata(fields))
-
-    def test_multiple_file_multipart_formdata(self):
-        from leo.testing.mime import BOUNDARY
-        from leo.testing.mime import SUBBOUNDARY
-        browser = self.make_browser()
-        fields = {
-            'files': [
-                {
-                    'data': StringIO.StringIO('text_file'),
-                    'content-type': 'text/plain',
-                    'filename': 'filename.txt'},
-                {
-                    'data': StringIO.StringIO('image_file'),
-                    'content-type': 'image/gif',
-                    'filename': 'filename.png'}]}
-        res = (
-            '--{0}\r\nContent-Disposition: form-data; name="files"\r\nContent-Type: multipart/mixed; boundary={1}\r\n\r\n--{1}\r\nContent-Disposition: file; filename="filename.txt"\r\nContent-Type: text/plain\r\n\r\ntext_file\r\n--{1}\r\nContent-Disposition: file; filename="filename.png"\r\nContent-Type: image/gif\r\n\r\nimage_file\r\n--{1}--\r\n--{0}--\r\n'.format(BOUNDARY, SUBBOUNDARY),
-            'multipart/form-data; boundary={0}'.format(BOUNDARY))
-        self.assertEquals(res, browser.multipart_formdata(fields))
-
-    def test_non_file_field_single_file_field_and_multiple_file_field_together(self):
-        from leo.testing.mime import BOUNDARY
-        from leo.testing.mime import SUBBOUNDARY
-        browser = self.make_browser()
-        fields = {
-            'username': 'Some Name',
-            'single_file': {
-                'data': StringIO.StringIO('single_text_file'),
-                'content-type': 'text/plain',
-                'filename': 'single_filename.txt'},
-            'multiple_files': [
-                {
-                    'data': StringIO.StringIO('text_file'),
-                    'content-type': 'text/plain',
-                    'filename': 'filename.txt'},
-                {
-                    'data': StringIO.StringIO('image_file'),
-                    'content-type': 'image/gif',
-                    'filename': 'filename.png'}]}
-        res = (
-            '--{0}\r\nContent-Disposition: form-data; name="multiple_files"\r\nContent-Type: multipart/mixed; boundary={1}\r\n\r\n--{1}\r\nContent-Disposition: file; filename="filename.txt"\r\nContent-Type: text/plain\r\n\r\ntext_file\r\n--{1}\r\nContent-Disposition: file; filename="filename.png"\r\nContent-Type: image/gif\r\n\r\nimage_file\r\n--{1}--\r\n--{0}\r\nContent-Disposition: form-data; name=single_file; filename=single_filename.txt\r\nContent-Type: text/plain\r\n\r\nsingle_text_file\r\n--{0}\r\nContent-Disposition: form-data; name=username\r\nContent-Length: 9\r\n\r\nSome Name\r\n--{0}--\r\n'.format(BOUNDARY, SUBBOUNDARY),
-            'multipart/form-data; boundary={0}'.format(BOUNDARY))
-        self.assertEquals(res, browser.multipart_formdata(fields))
-
-
-class TestLeoMechanizeBrowser(unittest.TestCase):
-    """Tests for mechanize browser testing implementation."""
-
-    def test_httpHandlerFactory(self):
-        from leo.testing.browser import LeoMechanizeBrowser
-        from leo.testing.browser import LeoHTTPHandler
-        app = mock.Mock()
-        mech_browser = LeoMechanizeBrowser(app)
-        self.failUnless(isinstance(mech_browser.handler_classes['http'](), LeoHTTPHandler))
-
-
-class TestLeoHTTPHandler(unittest.TestCase):
-    """Tests for http handler testing implementation."""
-
-    def test_has_data_do_request(self):
-        from leo.testing.browser import LeoHTTPHandler
-        from leo.testing.mime import BOUNDARY
-        from mechanize._request import Request
-        request = Request('/plone/@@echo', data=True)
-        request.get_host = mock.Mock()
-        request.get_host.return_value = 'nohost'
-        request.has_data = mock.Mock()
-        request.has_data.return_value = True
-        request.get_data = mock.Mock()
-        request.get_data.return_value = 'Data'
-        request.has_proxy = mock.Mock()
-        request.has_proxy.return_value = False
-        app = mock.Mock()
-        handler = LeoHTTPHandler(app)
-        handler.parent = mock.Mock()
-        handler.parent.addheaders = [('User-agent', 'Python-urllib/2.6')]
-        handler.do_request_(request)
-        ctype = 'multipart/form-data; boundary={0}'.format(BOUNDARY)
-        self.assertEquals(ctype, request.unredirected_hdrs['Content-type'])
-
-    def test_has_not_data_do_request(self):
-        from leo.testing.browser import LeoHTTPHandler
-        from mechanize._request import Request
-        request = Request('/plone/@@echo', data=True)
-        request.get_host = mock.Mock()
-        request.get_host.return_value = 'nohost'
-        request.has_data = mock.Mock()
-        request.has_data.return_value = False
-        request.has_proxy = mock.Mock()
-        request.has_proxy.return_value = False
-        app = mock.Mock()
-        handler = LeoHTTPHandler(app)
-        handler.parent = mock.Mock()
-        handler.parent.addheaders = [('User-agent', 'Python-urllib/2.6')]
-        handler.do_request_(request)
-#        ctype = 'multipart/form-data; boundary={0}'.format(BOUNDARY)
-        ## Now uses default application/x-www-form-urlencoded istead of multipart/form-data
-        self.assertRaises(KeyError, lambda: request.unredirected_hdrs['Content-type'])
-
-    def test_http_request(self):
-        """Testing that http_request is the same as do_request_ method."""
-        from leo.testing.browser import LeoHTTPHandler
-        app = mock.Mock()
-        handler = LeoHTTPHandler(app)
-        self.assertEquals('do_request_', handler.http_request.im_func.__name__)
-        self.assertEquals('LeoHTTPHandler', handler.http_request.im_class.__name__)

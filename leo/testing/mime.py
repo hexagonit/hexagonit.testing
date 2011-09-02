@@ -113,3 +113,43 @@ def multifile(key, value, boundary):
         values,
         '']
     return parts
+
+
+def multipart_formdata(data):
+    """
+    Given a dictionary field parameters, returns the HTTP request body and the
+    content_type (which includes the boundary string), to be used with an
+    httplib-like call.
+
+    This function is adapted from
+
+       http://urllib3.googlecode.com/svn/trunk/urllib3/filepost.py
+
+    :param data: Data which is list of tuples.
+    :type data: list
+    """
+
+    body = []
+#    for key, value in sorted(fields.items()):
+    for key, value in data:
+        if isinstance(value, dict):
+            body.append(MULTIPART_ONE_FILE_TMPL.format({
+                'boundary': BOUNDARY,
+                'name': key,
+                'filename': value['filename'],
+                'content-type': value['content-type'],
+                'value': value['data'].read(),
+            }))
+        elif isinstance(value, list):
+            body.append('\r\n'.join(multifile(key, value, BOUNDARY)))
+        else:
+            body.append(MULTIPART_TEXT_TMPL.format({
+                'boundary': BOUNDARY,
+                'name': key,
+                'value': value,
+                'length': len(value),
+            }))
+    body.append('--{0}--\r\n'.format(BOUNDARY))
+    content_type = 'multipart/form-data; boundary={0}'.format(BOUNDARY)
+
+    return ''.join(body), content_type
