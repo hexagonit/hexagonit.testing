@@ -99,16 +99,15 @@ class Browser(z2.Browser):
 
         Usually it is u'plone.leftcolumn' or u'plone.rightcolumn'.
         
-        >>> column = getUtility(IPortletManager, name=name)
-        >>> assignable = getMultiAdapter((portal, column), IPortletAssignmentMapping)
-        >>> del assignable[name]
-        
         :param portal: Portal object.
         :type portal: object
 
         :param name: Portlet manager name.
         :type name: unicode
         """
+        column = getUtility(IPortletManager, name=name)
+        assignable = getMultiAdapter((portal, column), IPortletAssignmentMapping)
+        del assignable[name]
 
      ## This method is not working properly for now.
 #    def startZserver(self, browser=None):
