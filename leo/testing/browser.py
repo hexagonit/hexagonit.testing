@@ -32,9 +32,21 @@ class Browser(z2.Browser):
 
     def setBaseUrl(self, base_url):
         """Sets a base URL for all subsequent requests.
-        Usually this url is portal_url.
 
-        :param base_url: Base URL to avoide repetetive usage of the URL in testing.
+        Usually the base URL is set to ``portal_url`` at the beginning of the
+        test with main benefit that subsequent calls to ``browser.open``
+        are easier to read. So instead of writing:
+
+            >>> browser.open('{0}/path/to/object'.format(self.portal.absolute_url()))
+            >>> browser.open('{0}/path/to/somewhere/else'.format(self.portal.absolute_url()))
+
+        You can write:
+
+            >>> browser.setBaseUrl(self.portal.absolute_url())
+            >>> browser.open('/path/to/object')
+            >>> browser.open('/path/to/somewhere/else')
+
+        :param base_url: Base URL to use in subsequent calls to ``open``.
         :type base_url: str
         """
         self._base_url = base_url
@@ -45,14 +57,16 @@ class Browser(z2.Browser):
         :param filename: File name.
         :type filename: str
         """
-        fh = open(filename, 'w')
-        fh.write(self.contents)
-        fh.close()
+        with open(filename, 'w') as fh:
+            fh.write(self.contents)
 
     def open(self, url, data=None):
-        """Adds support for absolute paths without the base component.
+        """Opens the given URL in the test browser with additional support for
+        base URLs (set using :py:meth:`leo.testing.browser.Browser.setBaseUrl`).
 
-        :param url: Absolute path.
+        The base URL is used when the given URL is an absolute path.
+
+        :param url: Absolute path or full URL.
         :type url: str
 
         :param data: Request Data.
@@ -80,6 +94,9 @@ class Browser(z2.Browser):
     def login(self, username, password, login_url='/login_form'):
         """Logs into the portal.
 
+        Assumes that the browser has been configured with a base URL pointing
+        to the portal root (see :py:meth:`leo.testing.browser.Browser.setBaseUrl`).
+
         :param username: User name.
         :type username: str
 
@@ -95,10 +112,10 @@ class Browser(z2.Browser):
         self.getControl('Log in').click()
 
     def deletePortletManager(self, portal, name):
-        """Delete portlet manager of the name.
+        """Deletes a portlet manager of the given name.
 
         Usually it is u'plone.leftcolumn' or u'plone.rightcolumn'.
-        
+
         :param portal: Portal object.
         :type portal: object
 
@@ -136,24 +153,62 @@ class Browser(z2.Browser):
         :type filename: str
         """
         filepath = os.path.join(gettempdir(), filename)
-        with open(filepath, 'w') as file:
-            file.write(self.contents)
-        if browser == None:
-            wbrowser = webbrowser
-        else:
-            wbrowser = webbrowser.get(browser)
+        with open(filepath, 'w') as fh:
+            fh.write(self.contents)
+
+        wbrowser = webbrowser if browser is None else webbrowser.get(browser)
         wbrowser.open_new_tab('file://' + filepath)
 
     def post(self, url, data):
-        """Posting to url with multipart/form-data instead of application/x-www-form-urlencoded.
+        """Posts the given data to the given url with a ``multipart/form-data``
+        submission instead of ``application/x-www-form-urlencoded``.
+
+        This is particularly useful if you need to test web APIs which expect
+        POST request without having to generate forms just for testing purposes.
+
+            >>> browser.post('/web-api', {
+            ...   'foo': 'bar',
+            ...   'bar': 'foo',
+            ... })
+
+        To POST a file you can use the following dictionary structure as value for
+        the field:
+
+        .. code-block:: python
+
+            { 'filename': 'my-document.pdf',
+              'content-type': 'application/pdf',
+              'data' : open('/tmp/my-document.pdf'),
+              }
+
+        The dictionary must contain the above fields where ``filename`` and ``content-type``
+        are strings and ``data`` is a file-like object. To perform a file upload you could
+        make a following kind of call:
+
+            >>> browser.post('/web-api', {
+            ...   'my_file_field': {
+            ...       'filename': 'my-document.pdf',
+            ...       'content-type': 'application/pdf',
+            ...       'data' : open('/tmp/my-document.pdf'),
+            ...       }
+            ... })
+
+        If the order of the submitted fields is significant a sequence of
+        ``(key, value)`` tuples may be used instead.
+
+            >>> browser.post('/web-api', [
+            ...   ('foo', 'bar'),
+            ...   ('bar', 'foo'),
+            ... ])
 
         :param url: where data will be posted.
         :type url: str
 
-        :param data: Data which is a list of tuples for data posting.
-        :type data: list
+        :param data: Submission data either as an iterable of ``(key, value)``
+            tuples or a dictionary.
+        :type data: iterable or dict
         """
-        body, content_type = multipart_formdata(data)
+        body, content_type = multipart_formdata(data.items() if hasattr(data, 'items') else data)
         data = "Content-Type: {0}\r\n\r\n{1}".format(content_type, body)
 
         return super(Browser, self).post(url, data)

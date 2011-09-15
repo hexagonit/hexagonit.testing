@@ -116,9 +116,8 @@ def multifile(key, value, boundary):
 
 
 def multipart_formdata(data):
-    """
-    Given a dictionary field parameters, returns the HTTP request body and the
-    content_type (which includes the boundary string), to be used with an
+    """Given an iterable of (key, value) field parameters, returns the HTTP request
+    body and the content_type (which includes the boundary string), to be used with an
     httplib-like call.
 
     This function is adapted from
