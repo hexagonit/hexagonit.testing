@@ -79,15 +79,6 @@ class TestBrowser(unittest.TestCase):
         browser.deletePortletManager(portal, name)
         self.assertEquals({'plone.rightcolumn': ''}, portlet_managers)
 
-    # @mock.patch('leo.testing.browser.webbrowser')
-    # def test_startZserver(self, webbrowser):
-    #     browser = self.make_browser()
-    #     browser.startZserver()
-    #     self.failUnless(webbrowser.open_new_tab.called)
-    #     browser.startZserver('firefox')
-    #     webbrowser.get.assert_called_with('firefox')
-    #     self.failUnless(webbrowser.open_new_tab.called)
-
     @mock.patch('leo.testing.browser.webbrowser')
     def test_openBrowser(self, webbrowser):
         browser = self.make_browser()
@@ -114,18 +105,3 @@ class TestBrowser(unittest.TestCase):
         browser.setBaseUrl('http://nohost/plone')
         data = [('content-type', 'text/plain'), ('filename', 'filename.txt')]
         self.assertRaises(HTTPError, lambda: browser.post('/@@no-page', data))
-
-#    def test_post_to_existing_page_with_empty_data(self):
-#        browser = self.make_browser()
-#        from urllib2 import HTTPError
-#        browser.setBaseUrl('http://nohost/plone')
-#        data = {}
-#        browser.post('/', data)
-##        self.assertRaises(HTTPError, lambda: browser.post('/@@echo', data))
-
-#    def test_post_to_existing_page_with_empty_data(self):
-#        browser = self.make_browser()
-#        from urllib2 import HTTPError
-#        browser.setBaseUrl('http://nohost/plone')
-#        data = {'some_name': }
-#        browser.post('/', data)

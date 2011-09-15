@@ -58,7 +58,7 @@ Post multiple files, one file and username::
     ...         ]
     ...     ),
     ...     (
-    ...         'single_file', 
+    ...         'single_file',
     ...         {
     ...             'data': StringIO('single_text_file'),
     ...             'content-type': 'text/plain',
@@ -74,14 +74,3 @@ Post multiple files, one file and username::
     >>> print browser.contents
     REQUEST_METHOD: POST
     ["multiple_files", "single_file", "username"]
-
-#Open browser::
-#
-#    >>> browser.openBrowser()
-#    >>> browser.openBrowser('epiphany')
-
-#Start zServer::
-#
-#    >>> browser.startZserver()
-#
-#    >>> browser.startZserver('firefox')
