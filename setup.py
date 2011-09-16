@@ -7,12 +7,12 @@ def read(*rnames):
     return open(os.path.join(os.path.dirname(__file__), *rnames)).read()
 
 
-version = read('leo', 'testing', 'version.txt').strip()
+version = read('hexagonit', 'testing', 'version.txt').strip()
 
 long_description = (
-    read('leo', 'testing', 'docs', 'index.rst'))
+    read('hexagonit', 'testing', 'docs', 'README.rst'))
 
-setup(name='leo.testing',
+setup(name='hexagonit.testing',
       version=version,
       description="Plone4 test helper which uses plone.testing and manuel.",
       long_description=long_description,
@@ -28,7 +28,7 @@ setup(name='leo.testing',
       url='',
       license='BSD',
       packages=find_packages(exclude=['ez_setup']),
-      namespace_packages=['leo'],
+      namespace_packages=['hexagonit'],
       include_package_data=True,
       zip_safe=False,
       install_requires=[

@@ -1,0 +1,20 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    i18n_domain="hexagonit.testing">
+
+  <browser:page
+    name="echo"
+    for="*"
+    class=".template.EchoView"
+    permission="zope2.View"
+    />
+
+  <browser:page
+    name="test-form"
+    for="*"
+    class=".template.TestFormView"
+    permission="zope2.View"
+    />
+
+</configure>

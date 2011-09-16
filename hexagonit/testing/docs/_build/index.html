@@ -1,0 +1,377 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>hexagonit.testing &mdash; hexagonit.testing v1.0 documentation</title>
+    <link rel="stylesheet" href="_static/rtd.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="hexagonit.testing v1.0 documentation" href="#" />
+    <link rel="next" title="Installation" href="INSTALL.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="INSTALL.html" title="Installation"
+             accesskey="N">next</a> |</li>
+        <li><a href="#">hexagonit.testing v1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="hexagonit-testing">
+<h1>hexagonit.testing<a class="headerlink" href="#hexagonit-testing" title="Permalink to this headline">¶</a></h1>
+<p>This package provides useful helper methods for browser testing in Plone by
+enhancing the <a class="reference external" href="http://pypi.python.org/pypi/zope.testbrowser">zope.testbrowser</a> test browser. The main
+purpose is to make functional browser tests read easier by reducing the amount
+of confusing setup code.</p>
+<div class="section" id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
+<p>To use the enhanced test browser simple instantiate it in place of
+<tt class="docutils literal"><span class="pre">plone.testing.z2.Browser</span></tt> in your tests, e.g.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">hexagonit.testing.browser</span> <span class="kn">import</span> <span class="n">Browser</span>
+<span class="n">browser</span> <span class="o">=</span> <span class="n">Browser</span><span class="p">()</span>
+
+<span class="c"># Set the base URL for easier browsing.</span>
+<span class="n">browser</span><span class="o">.</span><span class="n">setBaseUrl</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">portal</span><span class="o">.</span><span class="n">absolute_url</span><span class="p">())</span>
+
+<span class="c"># Access objects using readable URLs.</span>
+<span class="n">browser</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s">&#39;/my/cool-page&#39;</span><span class="p">)</span>
+<span class="n">browser</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s">&#39;/some/other/place&#39;</span><span class="p">)</span>
+
+<span class="c"># Login in to the portal</span>
+<span class="n">browser</span><span class="o">.</span><span class="n">login</span><span class="p">(</span><span class="s">&#39;r00t&#39;</span><span class="p">,</span> <span class="s">&#39;s3kr3t&#39;</span><span class="p">)</span>
+
+<span class="c"># Inspect the current URL in a real browser.</span>
+<span class="n">browser</span><span class="o">.</span><span class="n">openBrowser</span><span class="p">()</span>
+
+<span class="c"># POST data directly without a &lt;form&gt;, including a file upload.</span>
+<span class="n">browser</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s">&#39;/web-api&#39;</span><span class="p">,</span> <span class="p">{</span>
+    <span class="s">&#39;foo&#39;</span><span class="p">:</span> <span class="s">&#39;bar&#39;</span><span class="p">,</span>
+    <span class="s">&#39;my_file_field&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s">&#39;filename&#39;</span><span class="p">:</span> <span class="s">&#39;my-document.pdf&#39;</span><span class="p">,</span>
+        <span class="s">&#39;content-type&#39;</span><span class="p">:</span> <span class="s">&#39;application/pdf&#39;</span><span class="p">,</span>
+        <span class="s">&#39;data&#39;</span> <span class="p">:</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;/tmp/my-document.pdf&#39;</span><span class="p">),</span>
+        <span class="p">}</span>
+    <span class="p">})</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="module-hexagonit.testing.browser">
+<span id="api"></span><h2>API<a class="headerlink" href="#module-hexagonit.testing.browser" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="hexagonit.testing.browser.Browser">
+<em class="property">class </em><tt class="descclassname">hexagonit.testing.browser.</tt><tt class="descname">Browser</tt><big>(</big><em>app</em>, <em>url=None</em><big>)</big><a class="reference internal" href="_modules/hexagonit/testing/browser.html#Browser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hexagonit.testing.browser.Browser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Enhanced test browser.</p>
+<dl class="method">
+<dt id="hexagonit.testing.browser.Browser.setBaseUrl">
+<tt class="descname">setBaseUrl</tt><big>(</big><em>base_url</em><big>)</big><a class="reference internal" href="_modules/hexagonit/testing/browser.html#Browser.setBaseUrl"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hexagonit.testing.browser.Browser.setBaseUrl" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets a base URL for all subsequent requests.</p>
+<p>Usually the base URL is set to <tt class="docutils literal"><span class="pre">portal_url</span></tt> at the beginning of the
+test with main benefit that subsequent calls to <tt class="docutils literal"><span class="pre">browser.open</span></tt>
+are easier to read. So instead of writing:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">browser</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s">&#39;{0}/path/to/object&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">portal</span><span class="o">.</span><span class="n">absolute_url</span><span class="p">()))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">browser</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s">&#39;{0}/path/to/somewhere/else&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">portal</span><span class="o">.</span><span class="n">absolute_url</span><span class="p">()))</span>
+</pre></div>
+</div>
+<p>You can write:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">browser</span><span class="o">.</span><span class="n">setBaseUrl</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">portal</span><span class="o">.</span><span class="n">absolute_url</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">browser</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s">&#39;/path/to/object&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">browser</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s">&#39;/path/to/somewhere/else&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>base_url</strong> (<em>str</em>) &#8211; Base URL to use in subsequent calls to <tt class="docutils literal"><span class="pre">open</span></tt>.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="hexagonit.testing.browser.Browser.dump">
+<tt class="descname">dump</tt><big>(</big><em>filename</em><big>)</big><a class="reference internal" href="_modules/hexagonit/testing/browser.html#Browser.dump"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hexagonit.testing.browser.Browser.dump" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dumps the browser contents to the given file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> (<em>str</em>) &#8211; File name.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="hexagonit.testing.browser.Browser.open">
+<tt class="descname">open</tt><big>(</big><em>url</em>, <em>data=None</em><big>)</big><a class="reference internal" href="_modules/hexagonit/testing/browser.html#Browser.open"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hexagonit.testing.browser.Browser.open" title="Permalink to this definition">¶</a></dt>
+<dd><p>Opens the given URL in the test browser with additional support for
+base URLs (set using <a class="reference internal" href="#hexagonit.testing.browser.Browser.setBaseUrl" title="hexagonit.testing.browser.Browser.setBaseUrl"><tt class="xref py py-meth docutils literal"><span class="pre">hexagonit.testing.browser.Browser.setBaseUrl()</span></tt></a>).</p>
+<p>The base URL is used when the given URL is an absolute path.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>url</strong> (<em>str</em>) &#8211; Absolute path or full URL.</li>
+<li><strong>data</strong> (<em>dict</em>) &#8211; Request Data.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="hexagonit.testing.browser.Browser.setHeader">
+<tt class="descname">setHeader</tt><big>(</big><em>name</em>, <em>value</em><big>)</big><a class="reference internal" href="_modules/hexagonit/testing/browser.html#Browser.setHeader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hexagonit.testing.browser.Browser.setHeader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets a request header possibly overwriting an existing header with
+the same name.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> (<em>str</em>) &#8211; Header name.</li>
+<li><strong>value</strong> (<em>str</em>) &#8211; Header value against the name.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="hexagonit.testing.browser.Browser.login">
+<tt class="descname">login</tt><big>(</big><em>username</em>, <em>password</em>, <em>login_url='/login_form'</em><big>)</big><a class="reference internal" href="_modules/hexagonit/testing/browser.html#Browser.login"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hexagonit.testing.browser.Browser.login" title="Permalink to this definition">¶</a></dt>
+<dd><p>Logs into the portal.</p>
+<p>Assumes that the browser has been configured with a base URL pointing
+to the portal root (see <a class="reference internal" href="#hexagonit.testing.browser.Browser.setBaseUrl" title="hexagonit.testing.browser.Browser.setBaseUrl"><tt class="xref py py-meth docutils literal"><span class="pre">hexagonit.testing.browser.Browser.setBaseUrl()</span></tt></a>).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>username</strong> (<em>str</em>) &#8211; User name.</li>
+<li><strong>password</strong> (<em>str</em>) &#8211; Password.</li>
+<li><strong>login_url</strong> (<em>str</em>) &#8211; Absolute path for the login URL.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="hexagonit.testing.browser.Browser.deletePortletManager">
+<tt class="descname">deletePortletManager</tt><big>(</big><em>portal</em>, <em>name</em><big>)</big><a class="reference internal" href="_modules/hexagonit/testing/browser.html#Browser.deletePortletManager"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hexagonit.testing.browser.Browser.deletePortletManager" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deletes a portlet manager of the given name.</p>
+<p>Usually it is u&#8217;plone.leftcolumn&#8217; or u&#8217;plone.rightcolumn&#8217;.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>portal</strong> (<em>object</em>) &#8211; Portal object.</li>
+<li><strong>name</strong> (<em>unicode</em>) &#8211; Portlet manager name.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="hexagonit.testing.browser.Browser.openBrowser">
+<tt class="descname">openBrowser</tt><big>(</big><em>browser=None</em>, <em>filename='testbrowser.html'</em><big>)</big><a class="reference internal" href="_modules/hexagonit/testing/browser.html#Browser.openBrowser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hexagonit.testing.browser.Browser.openBrowser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dumps self.browser.contents (HTML) to a file and opens it with
+a normal browser.</p>
+<p>If browser is not specified, system default browser will be used.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>browser</strong> (<em>str</em>) &#8211; Excutable browser name such as &#8216;firefox&#8217;.</li>
+<li><strong>filename</strong> (<em>str</em>) &#8211; HTML file name where the results of html contents will be writen.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="hexagonit.testing.browser.Browser.post">
+<tt class="descname">post</tt><big>(</big><em>url</em>, <em>data</em><big>)</big><a class="reference internal" href="_modules/hexagonit/testing/browser.html#Browser.post"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hexagonit.testing.browser.Browser.post" title="Permalink to this definition">¶</a></dt>
+<dd><p>Posts the given data to the given url with a <tt class="docutils literal"><span class="pre">multipart/form-data</span></tt>
+submission instead of <tt class="docutils literal"><span class="pre">application/x-www-form-urlencoded</span></tt>.</p>
+<p>This is particularly useful if you need to test web APIs which expect
+POST request without having to generate forms just for testing purposes.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">browser</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s">&#39;/web-api&#39;</span><span class="p">,</span> <span class="p">{</span>
+<span class="gp">... </span>  <span class="s">&#39;foo&#39;</span><span class="p">:</span> <span class="s">&#39;bar&#39;</span><span class="p">,</span>
+<span class="gp">... </span>  <span class="s">&#39;bar&#39;</span><span class="p">:</span> <span class="s">&#39;foo&#39;</span><span class="p">,</span>
+<span class="gp">... </span><span class="p">})</span>
+</pre></div>
+</div>
+<p>To POST a file you can use the following dictionary structure as value for
+the field:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span> <span class="s">&#39;filename&#39;</span><span class="p">:</span> <span class="s">&#39;my-document.pdf&#39;</span><span class="p">,</span>
+  <span class="s">&#39;content-type&#39;</span><span class="p">:</span> <span class="s">&#39;application/pdf&#39;</span><span class="p">,</span>
+  <span class="s">&#39;data&#39;</span> <span class="p">:</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;/tmp/my-document.pdf&#39;</span><span class="p">),</span>
+  <span class="p">}</span>
+</pre></div>
+</div>
+<p>The dictionary must contain the above fields where <tt class="docutils literal"><span class="pre">filename</span></tt> and <tt class="docutils literal"><span class="pre">content-type</span></tt>
+are strings and <tt class="docutils literal"><span class="pre">data</span></tt> is a file-like object. To perform a file upload you could
+make a following kind of call:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">browser</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s">&#39;/web-api&#39;</span><span class="p">,</span> <span class="p">{</span>
+<span class="gp">... </span>  <span class="s">&#39;my_file_field&#39;</span><span class="p">:</span> <span class="p">{</span>
+<span class="gp">... </span>      <span class="s">&#39;filename&#39;</span><span class="p">:</span> <span class="s">&#39;my-document.pdf&#39;</span><span class="p">,</span>
+<span class="gp">... </span>      <span class="s">&#39;content-type&#39;</span><span class="p">:</span> <span class="s">&#39;application/pdf&#39;</span><span class="p">,</span>
+<span class="gp">... </span>      <span class="s">&#39;data&#39;</span> <span class="p">:</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;/tmp/my-document.pdf&#39;</span><span class="p">),</span>
+<span class="gp">... </span>      <span class="p">}</span>
+<span class="gp">... </span><span class="p">})</span>
+</pre></div>
+</div>
+<p>If the order of the submitted fields is significant a sequence of
+<tt class="docutils literal"><span class="pre">(key,</span> <span class="pre">value)</span></tt> tuples may be used instead.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">browser</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s">&#39;/web-api&#39;</span><span class="p">,</span> <span class="p">[</span>
+<span class="gp">... </span>  <span class="p">(</span><span class="s">&#39;foo&#39;</span><span class="p">,</span> <span class="s">&#39;bar&#39;</span><span class="p">),</span>
+<span class="gp">... </span>  <span class="p">(</span><span class="s">&#39;bar&#39;</span><span class="p">,</span> <span class="s">&#39;foo&#39;</span><span class="p">),</span>
+<span class="gp">... </span><span class="p">])</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>url</strong> (<em>str</em>) &#8211; where data will be posted.</li>
+<li><strong>data</strong> (<em>iterable or dict</em>) &#8211; Submission data either as an iterable of <tt class="docutils literal"><span class="pre">(key,</span> <span class="pre">value)</span></tt>
+tuples or a dictionary.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<p>Contents:</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="INSTALL.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="HISTORY.html">Changelog</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="HISTORY.html#id1">1.0 (2011-09-16)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="LICENSE.html">License</a></li>
+</ul>
+</div>
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><em>Index</em></a></li>
+<li><a class="reference internal" href="py-modindex.html"><em>Module Index</em></a></li>
+<li><a class="reference internal" href="search.html"><em>Search Page</em></a></li>
+</ul>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="#">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">hexagonit.testing</a><ul>
+<li><a class="reference internal" href="#usage">Usage</a></li>
+<li><a class="reference internal" href="#module-hexagonit.testing.browser">API</a><ul>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+
+  <h4>Next topic</h4>
+  <p class="topless"><a href="INSTALL.html"
+                        title="next chapter">Installation</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/index.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="INSTALL.html" title="Installation"
+             >next</a> |</li>
+        <li><a href="#">hexagonit.testing v1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Hexagon IT.
+      Last updated on 16.09.2011 15:03.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>
