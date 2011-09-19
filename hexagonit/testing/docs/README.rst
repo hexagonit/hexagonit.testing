@@ -8,7 +8,7 @@ enhancing the `zope.testbrowser
 The main purpose is to make functional browser tests read easier by reducing the amount
 of confusing setup code.
 
-Farther Documentation URL
+Further Documentation URL
 -------------------------
 
 `http://packages.python.org/hexagonit.testing/
