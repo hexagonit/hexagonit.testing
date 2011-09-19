@@ -1,7 +1,8 @@
-leo/testing/docs/_build/*
+hexagonit/testing/docs/_build/*
 *.egg-info
 *.pyc
 *.pyo
 *~
 .DS_Store
 dist
+.long-description.html
