@@ -51,6 +51,7 @@ Contents:
 
     INSTALL.rst
     HISTORY.rst
+    CONTRIBUTORS.rst
     LICENSE.rst
 
 Indices and tables

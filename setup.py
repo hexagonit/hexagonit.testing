@@ -12,6 +12,14 @@ version = read('hexagonit', 'testing', 'version.txt').strip()
 long_description = (
     read('hexagonit', 'testing', 'docs', 'README.rst'))
 
+
+long_description = (
+    open(os.path.join("hexagonit", "testing", "docs", "README.rst")).read() + "\n" +
+    # open(os.path.join("hexagonit", "testing", "docs", "INSTALL.rst")).read() + "\n" +
+    open(os.path.join("hexagonit", "testing", "docs", "HISTORY.rst")).read() + "\n" +
+    open(os.path.join("hexagonit", "testing", "docs", "CONTRIBUTORS.rst")).read()
+    )
+
 setup(name='hexagonit.testing',
       version=version,
       description="Plone4 test helper which uses plone.testing and manuel.",
