@@ -15,7 +15,6 @@ long_description = (
 
 long_description = (
     open(os.path.join("hexagonit", "testing", "docs", "README.rst")).read() + "\n" +
-    # open(os.path.join("hexagonit", "testing", "docs", "INSTALL.rst")).read() + "\n" +
     open(os.path.join("hexagonit", "testing", "docs", "HISTORY.rst")).read() + "\n" +
     open(os.path.join("hexagonit", "testing", "docs", "CONTRIBUTORS.rst")).read()
     )
