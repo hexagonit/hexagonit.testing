@@ -1,5 +1,6 @@
 from setuptools import find_packages
 from setuptools import setup
+
 import os
 
 
@@ -39,6 +40,7 @@ setup(name='hexagonit.testing',
       include_package_data=True,
       zip_safe=False,
       install_requires=[
+          'mock',
           'plone.testing',
           'setuptools',
           'unittest2',
