@@ -1,8 +1,14 @@
 .. include:: README.rst
 
 
-Usage
------
+Browser testing
+---------------
+
+The `hexagonit.testing.browser` module provides an enhanced `zope.testbrowser
+<http://pypi.python.org/pypi/zope.testbrowser>`_ test browser.
+
+The main purpose is to make functional browser tests read easier by reducing the amount
+of confusing setup code.
 
 To use the enhanced test browser simple instantiate it in place of
 ``plone.testing.z2.Browser`` in your tests, e.g.
@@ -35,6 +41,35 @@ To use the enhanced test browser simple instantiate it in place of
             }
         })
 
+
+Date manipulation
+-----------------
+
+The `hexagonit.testing.date` module provides helpers to mock out the
+dynamic constructors `datetime.date.today()` and `datetime.datetime.now()` by
+providing class generators which produce instances of these classes that return
+static values.
+
+This is particularly useful when used in conjunction with the `mock
+<http://www.voidspace.org.uk/python/mock/>`_ package during unit testing, e.g.
+
+.. code-block:: python
+
+    from hexagonit.testing.date import static_date
+    from hexagonit.testing.date import static_datetime
+    import datetime
+    import mock
+    import unittest
+
+    class MyTestCase(unittest.TestCase):
+
+        @mock.patch('my.module.datetime', static_datetime(datetime.datetime(2011, 12, 14, 12, 45)))
+        @mock.patch('my.module.date', static_date(datetime.date(2011, 12, 14)))
+        def test_something_that_uses_datetime(self):
+            # Within the test your application code calling `datetime.now()` or `date.today()`
+            # will always return the static values.
+            pass
+
 API
 ---
 
@@ -43,6 +78,12 @@ API
 .. autoclass:: Browser
    :members:
    :member-order: bysource
+
+.. automodule:: hexagonit.testing.date
+
+.. autofunction:: static_date
+
+.. autofunction:: static_datetime
 
 Contents:
 
