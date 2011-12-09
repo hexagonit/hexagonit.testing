@@ -1,6 +1,12 @@
 Changelog
 =========
 
+1.1 (2011-12-09)
+----------------
+
+Added functions to mock `datetime.datetime.now()` and `datetime.date.today()`.
+[dokai]
+
 1.0.1 (Unreleased)
 ------------------
 
