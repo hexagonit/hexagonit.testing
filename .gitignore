@@ -1,8 +1,10 @@
 hexagonit/testing/docs/_build/*
 *.egg-info
+*.mo
 *.pyc
 *.pyo
 *~
 .DS_Store
 dist
 .long-description.html
+setup.cfg
