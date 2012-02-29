@@ -8,14 +8,19 @@ from tempfile import gettempdir
 from zope.component import getMultiAdapter
 from zope.component import getUtility
 
+import lxml.html
 import os
 import webbrowser
+import re
+import hashlib
 
 
 class Browser(z2.Browser):
     """Enhanced test browser."""
 
     _base_url = None
+    _lxmlobject = None
+    _lxmlobject_chksum = ""
 
     def __init__(self, app, url=None):
         """Use __init__ method from the super class,
@@ -212,3 +217,28 @@ class Browser(z2.Browser):
         data = "Content-Type: {0}\r\n\r\n{1}".format(content_type, body)
 
         return super(Browser, self).post(url, data)
+
+    def grep(self, regex):
+        """Grepping contents with given regex."""
+        regex_search = re.compile(regex, re.I).search
+        return "\n".join(
+            line.strip() for line in self.contents.splitlines()
+            if regex_search(line)
+            )
+
+    def search(self, regex):
+        """Searching contents with given regex."""
+        return "\n".join(re.compile(regex, re.I|re.M|re.S).findall(self.contents))
+
+    def bycss(self, cssselector, numbered=True):
+        """Showing only parts specified by given CSS selector"""
+        new_digest = hashlib.sha1(self.contents).hexdigest()
+        if self._lxmlobject is None or self._lxmlobject_chksum != new_digest:
+            self._lxmlobject = lxml.html.fromstring(self.contents)
+            self._lxmlobject_chksum = new_digest
+        if numbered:
+            return "\n".join(("--- %i ---\n" % (i+1)) + ("\n").join(line.strip() for line in lxml.html.tostring(e).splitlines() if line.strip())
+                         for i, e in enumerate(self._lxmlobject.cssselect(cssselector)))
+        else:
+            return "\n".join(("--- ---\n") + ("\n").join(line.strip() for line in lxml.html.tostring(e).splitlines() if line.strip())
+                         for e in self._lxmlobject.cssselect(cssselector))
