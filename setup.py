@@ -12,7 +12,7 @@ long_description = (
 
 setup(
     name='hexagonit.testing',
-    version='1.1.1',
+    version='1.2',
     description="Plone4 test helper which uses plone.testing and manuel.",
     # long_description=long_description,
     long_description=long_description,
