@@ -1,10 +1,15 @@
 Changelog
 =========
 
+1.2.1 (2012-05-18)
+------------------
+
+- Added index for login method. [taito]
+
 1.2 (2012-02-29)
 ------------------
 
-- added new methods for browser: bycss, grep, search [rnd]
+- Added new methods for browser: bycss, grep, search [rnd]
 
 1.1.1 (2012-01-24)
 ------------------
