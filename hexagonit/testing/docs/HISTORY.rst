@@ -1,7 +1,7 @@
 Changelog
 =========
 
-1.2.1 (2012-05-18)
+1.2.1 (2012-05-XX)
 ------------------
 
 - Added index for login method. [taito]
