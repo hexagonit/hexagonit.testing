@@ -66,7 +66,7 @@ class TestBrowser(unittest.TestCase):
         self.assertEquals(getControl.call_args_list, [
             ((), {'name': '__ac_name'}),
             ((), {'name': '__ac_password'}),
-            (('Log in',), {})])
+            (('Log in',), {'index': 0})])
 
     @mock.patch('hexagonit.testing.browser.getUtility')
     @mock.patch('hexagonit.testing.browser.getMultiAdapter')
