@@ -96,7 +96,7 @@ class Browser(z2.Browser):
         headers[name.lower()] = (name, value)
         self.mech_browser.addheaders = [headers.pop(k.lower()) for k, v in self.mech_browser.addheaders] + headers.values()
 
-    def login(self, username, password, login_url='/login_form'):
+    def login(self, username, password, login_url='/login_form', index=0):
         """Logs into the portal.
 
         Assumes that the browser has been configured with a base URL pointing
@@ -110,11 +110,14 @@ class Browser(z2.Browser):
 
         :param login_url: Absolute path for the login URL.
         :type login_url: str
+
+        :param index: The index of the log in bottun.
+        :type index: int
         """
         self.open(login_url)
         self.getControl(name='__ac_name').value = username
         self.getControl(name='__ac_password').value = password
-        self.getControl('Log in').click()
+        self.getControl('Log in', index=index).click()
 
     def deletePortletManager(self, portal, name):
         """Deletes a portlet manager of the given name.
