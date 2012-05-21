@@ -48,6 +48,17 @@ class TestBrowser(unittest.TestCase):
         # Assert the underlying test browser was called with the full URL.
         browser.mech_browser.open.assert_called_with('http://nohost/plone/foo/bar', None)
 
+    def test_open_not_start_with_slash(self):
+        browser = self.make_browser()
+        browser.setBaseUrl('http://nohost/plone')
+
+        browser.mech_browser.open = mock.Mock()
+        browser.mech_browser.response = mock.Mock()
+        browser.mech_browser.response().info.return_value = {}
+
+        browser.open('foo/bar')
+        browser.mech_browser.open.assert_called_with('foo/bar', None)
+
     def test_setHeader(self):
         browser = self.make_browser()
         browser.mech_browser.addheaders = [('User-agent', 'Python-urllib/2.6'), ('If-Modified-Since', 'Tue, 17 May 2011 08:39:06 GMT')]
@@ -105,3 +116,27 @@ class TestBrowser(unittest.TestCase):
         browser.setBaseUrl('http://nohost/plone')
         data = [('content-type', 'text/plain'), ('filename', 'filename.txt')]
         self.assertRaises(HTTPError, lambda: browser.post('/@@no-page', data))
+
+    def test_bycss__class(self):
+        browser = self.make_browser()
+        browser._contents = '<div class="CLASS"><span id="ID">AAA</span></div>'
+        self.assertEqual(
+            browser.bycss('.CLASS'),
+            '--- 1 ---\n<div class="CLASS"><span id="ID">AAA</span></div>'
+        )
+
+    def test_bycss__id(self):
+        browser = self.make_browser()
+        browser._contents = '<div class="CLASS"><span id="ID">AAA</span></div>'
+        self.assertEqual(
+            browser.bycss('#ID'),
+            '--- 1 ---\n<span id="ID">AAA</span>'
+        )
+
+    def test_bycss_not_numbered(self):
+        browser = self.make_browser()
+        browser._contents = '<div class="CLASS"><span id="ID">AAA</span></div>'
+        self.assertEqual(
+            browser.bycss('#ID', numbered=False),
+            '--- ---\n<span id="ID">AAA</span>'
+        )
