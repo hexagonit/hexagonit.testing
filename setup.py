@@ -28,7 +28,7 @@ setup(
     keywords='',
     author='Hexagon IT',
     author_email='oss@hexagonit.fi',
-    url='',
+    url='http://packages.python.org/hexagonit.testing/',
     license='BSD',
     packages=find_packages(exclude=['ez_setup']),
     namespace_packages=['hexagonit'],
