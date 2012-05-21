@@ -1,6 +1,12 @@
 Changelog
 ---------
 
+1.2.2 (2012-XX-XX)
+==================
+
+- Default login_url updated from '/login_form' to '/login'.
+  [taito]
+
 1.2.1 (2012-05-21)
 ==================
 

@@ -96,7 +96,7 @@ class Browser(z2.Browser):
         headers[name.lower()] = (name, value)
         self.mech_browser.addheaders = [headers.pop(k.lower()) for k, v in self.mech_browser.addheaders] + headers.values()
 
-    def login(self, username, password, login_url='/login_form', index=0):
+    def login(self, username, password, login_url='/login', index=0):
         """Logs into the portal.
 
         Assumes that the browser has been configured with a base URL pointing
