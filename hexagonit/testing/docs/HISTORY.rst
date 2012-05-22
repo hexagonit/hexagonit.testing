@@ -1,7 +1,7 @@
 Changelog
 ---------
 
-1.2.2 (2012-XX-XX)
+1.2.2 (2012-05-22)
 ==================
 
 - Default login_url updated from '/login_form' to '/login'.
